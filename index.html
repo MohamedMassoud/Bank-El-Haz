@@ -54,6 +54,14 @@ h1{background:linear-gradient(90deg,var(--ac),#f4a300,var(--ac));background-size
 button{transition:transform .1s}button:active{transform:scale(.93)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 small{color:var(--mut)}
+.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;z-index:0}
+.sq b,.sq span,.sq small{position:relative;z-index:1}
+.sq i{z-index:1}
+.tk{z-index:2}
+.sq span,.sq small{font-weight:700;text-shadow:0 0 3px var(--card),0 0 3px var(--card),0 0 5px var(--card)}
+.hero{width:100%;height:clamp(110px,30vw,200px);object-fit:cover;border-radius:10px;border:2px solid var(--bd);margin-bottom:6px;background:var(--card)}
+.pcard{display:flex;align-items:center;gap:8px;font-weight:700;font-size:clamp(10px,2.8vw,15px);max-width:100%}
+.pcard img{height:clamp(34px,12vw,84px);max-width:46vw;object-fit:cover;border-radius:8px;border:2px solid var(--bd)}
 </style></head><body>
 <h1>🎲 بنك الحظ</h1>
 <button id="mu" class="s" onclick="mute()" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);inset-inline-start:8px;padding:4px 10px;margin:0;z-index:40">🔊</button><div id="toast"></div><div id="app"><p>جاري الاتصال…</p></div>
@@ -140,9 +148,9 @@ function board(s){
  let h='';
  for(let i=0;i<40;i++){
   const q=S[i],[r,c]=posOf(i),o=s.O[i],tk=s.P.map((p,k)=>!p.out&&(DP[k]!==undefined?DP[k]:p.pos)===i?`<u class="${k===s.t&&s.w==null?'cur':''}" style="background:${PC[p.c]};animation-delay:-${(Date.now()%1000)/1000}s"></u>`:'').join(''),pop=fx('pop')&&fx('pop').has(i),nw=fx('nw')&&fx('nw').has(i);
-  h+=`<div class="sq${pop?' pop':''}${nw?' nw':''}" style="grid-area:${r}/${c};${o!=null?`box-shadow:inset 0 0 0 3px ${PC[s.P[o].c]}`:''}${(pop||nw)?';'+ad(FX.ls):''}">${q[1]==='p'?`<i style="background:${GC[q[3]]}"></i>`:''}<b>${FL[i]||IC[q[1]]||''}</b><span>${esc(q[0])}</span>${q[2]?`<small>${q[2]}</small>`:''}<div class="tk">${tk}</div></div>`}
+  h+=`<div class="sq${pop?' pop':''}${nw?' nw':''}" style="grid-area:${r}/${c};${o!=null?`box-shadow:inset 0 0 0 3px ${PC[s.P[o].c]}`:''}${(pop||nw)?';'+ad(FX.ls):''}">${IMG[i]?`<img class="ph" src="${esc(IMG[i])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${q[1]==='p'?`<i style="background:${GC[q[3]]}"></i>`:''}<b>${FL[i]||IC[q[1]]||''}</b><span>${esc(q[0])}</span>${q[2]?`<small>${q[2]}</small>`:''}<div class="tk">${tk}</div></div>`}
  const D='⚀⚁⚂⚃⚄⚅';
- h+=`<div class="mid"><div class="t" style="animation-delay:-${(Date.now()%2500)/1000}s">بنك الحظ</div><div class="dice${fxr()?' roll':''}"${fxr()?` style="${ad(FX.rs)}"`:''}>${D[s.d[0]-1]}${D[s.d[1]-1]}</div><div class="log">${s.log.map(esc).join('<br>')}</div></div>`;
+ h+=`<div class="mid"><div class="t" style="animation-delay:-${(Date.now()%2500)/1000}s">بنك الحظ</div>${pcard()}<div class="dice${fxr()?' roll':''}"${fxr()?` style="${ad(FX.rs)}"`:''}>${D[s.d[0]-1]}${D[s.d[1]-1]}</div><div class="log">${s.log.map(esc).join('<br>')}</div></div>`;
  return h}
 function controls(s){
  if(s.w!=null)return `<b>🏆 الفايز: ${esc(s.P[s.w].n)} — مبروك!</b>`;
@@ -157,12 +165,12 @@ function controls(s){
  if(s.ph==='end')h+=B('end',s.again?'🎲 ارمي تاني (دبل!)':'خلّص دورك');
  return h}
 function render(){
- const a=document.getElementById('app'),s=G;
- if(!s&&!ref&&!local){return}
- calcFx(s);const st=s&&s.st;let h='';
+ const a=document.getElementById('app'),G0=G;
+ if(!G0&&!ref&&!local){return}
+ calcFx(G0);const s=(MOVING&&VIEW)?VIEW:G0,st=s&&s.st;let h='';
  if(!st){
   const P=s?s.P:[],joined=!local&&P.some(x=>x.id===me);
-  h+=`<div class="panel"><b>غرفة الانتظار</b> <small>${local?'(لعب على جهاز واحد)':'(أونلاين — افتح نفس اللينك مع صحابك)'}</small>`;
+  h+=`<div class="panel">${IMG.hero?`<img class="hero" src="${esc(IMG.hero)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'<div class="hero" style="display:flex;align-items:center;justify-content:center;font-size:56px">🏺</div>'}<b>غرفة الانتظار</b> <small>${local?'(لعب على جهاز واحد)':'(أونلاين — افتح نفس اللينك مع صحابك)'}</small>`;
   if(!local)h+=`<div><small>كود الغرفة: <b>${esc(ROOM)}</b> — ابعت اللينك ده لصحابك</small><input readonly value="${esc(location.href)}" onclick="this.select()" style="width:100%;margin:4px 0"></div>`;
   h+=P.map(p=>`<div class="pl"><span class="dot" style="background:${PC[p.c]}"></span>${esc(p.n)}</div>`).join('')||'<p><small>لسه محدش دخل</small></p>';
   if(!joined&&P.length<6)h+=`<div><input id="nm" placeholder="اسمك" maxlength="14"> <button onclick="act('join',document.getElementById('nm').value)">${local?'ضيف لاعب':'ادخل'}</button></div>`;
@@ -175,52 +183,55 @@ function render(){
   h+=s.P.map((p,i)=>`<div class="pl ${p.id===me?'me':''}"><span class="dot" style="background:${PC[p.c]}"></span>${i===s.t&&s.w==null?'▶ ':''}${esc(p.n)}${p.id===me?' (أنت)':''} — 💰 ${p.m} — 🏠 ${Object.values(s.O).filter(v=>v===i).length}${p.jail?' 🚔':''}${p.out?' 💀':''}${fx('dm')&&fx('dm')[i]?`<b class="fl ${fx('dm')[i]>0?'up':'dn'}" style="${ad(FX.ls)}">${fx('dm')[i]>0?'+':''}${fx('dm')[i]}</b>`:''}</div>`).join('');
   h+=`<button class="s" id="rs" onclick="act('reset')">${Date.now()<RC?'متأكد؟ اضغط تاني':'لعبة جديدة'}</button></div>`}
  if(err)h+=`<p style="color:var(--ac)">${esc(err)}</p>`;
- h+=`<p><small>القواعد: كل لاعب يبدأ بـ 1500 جنيه، البداية +200، السجن بدبل أو 50 جنيه، آخر واحد ما يفلسش يكسب. (من غير بيوت وفنادق في النسخة دي.)</small></p>`;
+ h+=`<p><small>القواعد: كل لاعب يبدأ بـ 1500 جنيه، البداية +200، السجن بدبل أو 50 جنيه، آخر واحد ما يفلسش يكسب. (من غير بيوت وفنادق في النسخة دي.)<br>الصور من ويكيبيديا (Wikimedia Commons) بتراخيص مفتوحة.</small></p>`;
  const ae=document.activeElement,nm=document.getElementById('nm'),v=nm&&nm.value;
  a.innerHTML=h;
  if(v){const n2=document.getElementById('nm');if(n2){n2.value=v;if(ae===nm)n2.focus()}}
- botTick()}
-let PP=null,PO={},PM=[],PJ=[],PR,PL='',WON=false,FX={},SIG='',DP=[],MOVING=false,AT=null;
+ INLOBBY=!st;musicSync();botTick()}
+let PP=null,PS=null,VIEW=null,CARD=0,PO={},PM=[],PJ=[],PR,PL='',WON=false,FX={},SIG='',DP=[],MOVING=false,AT=null;
 const STEP=180;
 const fx=k=>FX.ls&&Date.now()<FX.ls+1700&&FX[k];
 const fxr=()=>FX.roll&&FX.rs&&Date.now()<FX.rs+900;
 const ad=t=>`animation-delay:${(-(Date.now()-t)/1000).toFixed(2)}s`;
 function toast(t){const e=document.getElementById('toast');if(!e)return;e.textContent=t;e.classList.remove('on');void e.offsetWidth;e.classList.add('on')}
 function confetti(){const c=['#e63946','#f4a300','#2a9d4f','#1d6fd8','#9b59b6'];for(let i=0;i<60;i++){const d=document.createElement('div');d.className='cf';d.style.cssText=`left:${Math.random()*100}vw;background:${c[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s`;document.body.appendChild(d);setTimeout(()=>d.remove(),5500)}}
+function winCheck(s){if(s.w!=null){if(!WON){WON=true;confetti();setTimeout(()=>sfx('win'),400)}}else WON=false}
 function calcFx(s){
- if(!s||!s.st){PP=null;FX={};SIG='';DP=[];MOVING=false;clearTimeout(AT);return}
+ if(!s||!s.st){PP=null;PS=null;FX={};SIG='';DP=[];MOVING=false;VIEW=null;clearTimeout(AT);return}
  const sig=[s.rc,s.t,s.ph,s.w,JSON.stringify(s.P.map(p=>[p.pos,p.m,p.jail])),Object.keys(s.O).length].join('|');
  if(sig===SIG)return;SIG=sig;
  const t=s.log[0]||'',tn=t&&t!==PL;
- if(PP===null){DP=s.P.map(p=>p.pos)}
+ if(PP===null||!PS){DP=s.P.map(p=>p.pos);CARD=s.P[s.t]?s.P[s.t].pos:0}
  else{
-  clearTimeout(AT);MOVING=false;
-  const F={pop:new Set(),nw:new Set(),dm:{},roll:PR!==(s.rc||0),rs:Date.now()},mv=[];
+  clearTimeout(AT);MOVING=false;VIEW=null;
+  const F={pop:new Set(),nw:new Set(),dm:{},roll:PR!==(s.rc||0),rs:Date.now()},rk=PS.t,sum=s.d[0]+s.d[1];let m=null;
   s.P.forEach((p,k)=>{
    const from=DP[k]!==undefined?DP[k]:PP[k];
-   if(!p.out&&from!==undefined&&from!==p.pos){
-    F.pop.add(p.pos);const n=(p.pos-from+40)%40;
-    if((p.jail>0&&!(PJ[k]>0))||n>12){DP[k]=p.pos}else{DP[k]=from;mv.push({k,from,n})}
-   }else DP[k]=p.pos;
+   if(F.roll&&k===rk&&from!==undefined&&p.pos!==from){F.pop.add(p.pos);m={k,from,n:sum,end:p.pos};DP[k]=from}
+   else DP[k]=p.pos;
    if(PM[k]!==undefined&&PM[k]!==p.m)F.dm[k]=p.m-PM[k];
    if(p.jail>0&&!(PJ[k]>0))F.shake=1});
   for(const k in s.O)if(PO[k]===undefined)F.nw.add(+k);
-  if(mv.length){
+  if(m){
+   // the roller walks square by square; the screen keeps showing the OLD state (money, log, owners, turn) until arrival
    MOVING=true;FX={roll:F.roll,rs:F.rs};
+   VIEW=Object.assign(JSON.parse(JSON.stringify(PS)),{d:s.d});
    if(F.roll)sfx('dice');
-   let i=0;const mx=Math.max(...mv.map(m=>m.n));
-   const tick=()=>{i++;mv.forEach(m=>{if(i<=m.n)DP[m.k]=(m.from+i)%40});sfx('step');
-    if(i<mx){render();AT=setTimeout(tick,STEP)}
-    else{MOVING=false;s.P.forEach((p,k)=>{DP[k]=p.pos});FX={...F,ls:Date.now()};if(tn)toast(t);playFx(s,false,0);render()}};
+   let i=0;
+   const fin=()=>{MOVING=false;VIEW=null;s.P.forEach((p,k)=>{DP[k]=p.pos});CARD=m.end;FX={...F,ls:Date.now()};if(tn)toast(t);playFx(s,false,0);winCheck(s);render()};
+   const tick=()=>{i++;DP[m.k]=(m.from+i)%40;sfx('step');render();
+    if(i<m.n)AT=setTimeout(tick,STEP);
+    else if(m.end!==(m.from+m.n)%40)AT=setTimeout(fin,450);
+    else fin()};
    AT=setTimeout(tick,700)}
-  else{FX={...F,ls:F.rs+(F.roll?750:0)};if(tn)toast(t);playFx(s,true,F.roll?750:0)}
+  else{FX={...F,ls:F.rs+(F.roll?750:0)};if(F.roll&&s.P[rk])CARD=s.P[rk].pos;if(tn)toast(t);playFx(s,true,F.roll?750:0)}
  }
- PP=s.P.map(p=>p.pos);PO={...s.O};PM=s.P.map(p=>p.m);PJ=s.P.map(p=>p.jail);PR=s.rc||0;PL=t;
- if(s.w!=null){if(!WON){WON=true;confetti();setTimeout(()=>sfx('win'),400)}}else WON=false}
+ PP=s.P.map(p=>p.pos);PO={...s.O};PM=s.P.map(p=>p.m);PJ=s.P.map(p=>p.jail);PR=s.rc||0;PL=t;PS=JSON.parse(JSON.stringify(s));
+ if(!MOVING)winCheck(s)}
 let AC=null,MUTE=false;
 function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
 document.addEventListener('pointerdown',ac);
-function mute(){MUTE=!MUTE;document.getElementById('mu').textContent=MUTE?'🔇':'🔊'}
+function mute(){MUTE=!MUTE;document.getElementById('mu').textContent=MUTE?'🔇':'🔊';musicSync()}
 function tone(f,t0,d,type,v,f2){const c=AC;if(!c)return;const o=c.createOscillator(),g=c.createGain(),T=c.currentTime+t0;o.type=type||'sine';o.frequency.setValueAtTime(f,T);if(f2)o.frequency.exponentialRampToValueAtTime(f2,T+d);g.gain.setValueAtTime(v||.15,T);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(g);g.connect(c.destination);o.start(T);o.stop(T+d+.02)}
 function noise(t0,d,v){const c=AC;if(!c)return;const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0),T=c.currentTime+t0;for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;s.buffer=b;g.gain.setValueAtTime(v||.2,T);g.gain.exponentialRampToValueAtTime(.001,T+d);s.connect(f);f.connect(g);g.connect(c.destination);s.start(T)}
 function sfx(k){if(MUTE||!ac())return;
@@ -239,6 +250,38 @@ function playFx(s,dice,d){
  else if(t.startsWith('❓'))setTimeout(()=>sfx('card'),d);
  else if(FX.nw&&FX.nw.size)setTimeout(()=>sfx('buy'),d);
  else{const v=Object.values(FX.dm||{});if(v.some(x=>x<0))setTimeout(()=>sfx('pay'),d);else if(v.some(x=>x>0))setTimeout(()=>sfx('gain'),d)}}
+const IMG={},WP={};let IT=null;
+const WT={hero:'Giza_pyramid_complex',0:'Egyptian_pound',1:'Luxor',3:'Aswan',4:'Income_tax',5:'Cairo_International_Airport',6:'Alexandria',8:'Port_Said',9:'Sharm_El_Sheikh',10:'Prison',11:'Sanaa',12:'Power_station',13:'Khartoum',14:'Muscat,_Oman',15:'Suez',16:'Kuwait_City',18:'Doha',19:'Manama',20:'Parking_lot',21:'Beirut',23:'Amman',24:'Damascus',25:'Damietta',26:'Tunis',27:'Algiers',28:'Water_supply',29:'Rabat',30:'Handcuffs',31:'Abu_Dhabi',32:'Dubai',34:'Riyadh',35:'Ramses railway station Cairo',37:'Jeddah',38:'Luxury_tax',39:'Cairo',2:'Dice',7:'Dice',17:'Dice',22:'Dice',33:'Dice',36:'Dice'};
+// Wikipedia lead image of an article (CORS-enabled API), cached in localStorage
+const wimg=t=>WP[t]||(WP[t]=(async()=>{
+ try{const c=localStorage.getItem('wi2:'+t);if(c)return c}catch(e){}
+ let u=null;
+ try{const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t));if(r.ok){const j=await r.json();u=j.thumbnail&&j.thumbnail.source||null}}catch(e){}
+ if(!u){try{const r=await fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&gsrsearch='+encodeURIComponent(t.replace(/_/g,' '))+'&prop=pageimages&piprop=thumbnail&pithumbsize=400');const j=await r.json(),pg=j.query&&Object.values(j.query.pages)[0];u=pg&&pg.thumbnail&&pg.thumbnail.source||null}catch(e){}}
+ if(u)try{localStorage.setItem('wi2:'+t,u)}catch(e){}
+ return u})());
+function loadImgs(){for(const k in WT)wimg(WT[k]).then(u=>{if(u){IMG[k]=u;clearTimeout(IT);IT=setTimeout(render,400)}})}
+const pcard=()=>{const q=S[CARD];return `<div class="pcard">${IMG[CARD]?`<img src="${esc(IMG[CARD])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span>${FL[CARD]||IC[q[1]]||''} ${esc(q[0])}</span></div>`};
+// lobby music: لو عندك ملف mp3 حطه جنب index.html واكتب اسمه هنا (مثلا 'music.mp3'). لو سبته فاضي هيشغل لحن عربي (مقام حجاز) متولد في المتصفح
+const LOBBY_MUSIC_URL='';
+let MG=null,MT=null,MA=null,INLOBBY=false;
+function musicSync(){if(INLOBBY&&!MUTE)musicStart();else musicStop()}
+function musicStop(){if(MT){clearInterval(MT);MT=null}if(MA){MA.pause();MA=null}if(MG&&AC){const g=MG;MG=null;g.gain.setTargetAtTime(0,AC.currentTime,.15);setTimeout(()=>g.disconnect(),1200)}}
+function musicStart(){
+ if(MT||MA)return;
+ if(LOBBY_MUSIC_URL){MA=new Audio(LOBBY_MUSIC_URL);MA.loop=true;MA.volume=.4;MA.play().catch(()=>{});return}
+ const c=ac();if(!c)return;
+ MG=c.createGain();MG.gain.value=.5;MG.connect(c.destination);
+ const b=60/96,H=[293.66,311.13,369.99,392,440,466.16,523.25,587.33];
+ const BARS=[[[4,1],[3,.5],[2,.5],[1,1],[0,1]],[[2,1],[3,.5],[4,.5],[5,1],[4,1]],[[7,1],[6,.5],[5,.5],[4,1],[3,1]],[[2,.5],[1,.5],[0,2],[-1,1]]];
+ const N=(f,T,d,ty,v)=>{const o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f,T);fl.type='lowpass';fl.frequency.value=2200;g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(v,T+.015);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(fl);fl.connect(g);g.connect(MG);o.start(T);o.stop(T+d+.05)};
+ const dum=T=>{const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(150,T);o.frequency.exponentialRampToValueAtTime(55,T+.15);g.gain.setValueAtTime(.5,T);g.gain.exponentialRampToValueAtTime(.001,T+.3);o.connect(g);g.connect(MG);o.start(T);o.stop(T+.35)};
+ const tek=T=>{const n=Math.floor(c.sampleRate*.05),bf=c.createBuffer(1,n,c.sampleRate),a=bf.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='highpass';f.frequency.value=3000;s.buffer=bf;g.gain.value=.18;s.connect(f);f.connect(g);g.connect(MG);s.start(T)};
+ const sched=(T,bar)=>{let t=T;BARS[bar].forEach(([d,l])=>{if(d>=0){N(H[d],t,l*b*.95,'sawtooth',.13);N(H[d]/2,t,l*b*.95,'triangle',.07)}t+=l*b});
+  N(146.83,T,4*b,'sine',.09);
+  [[0,dum],[1,tek],[3,tek],[4,dum],[6,tek]].forEach(([e,fn])=>fn(T+e*b/2))};
+ let nx=c.currentTime+.15,bar=0;
+ MT=setInterval(()=>{while(nx<c.currentTime+.4){sched(nx,bar);nx+=4*b;bar=(bar+1)%4}},120)}
 let RC=0;
 let bt=null;
 function botTick(){
@@ -250,7 +293,7 @@ function botTick(){
   else if(s.ph==='buy')act(p.m-S[p.pos][2]>=150?'buy':'skip');
   else act('end')},1000)}
 (async()=>{
- const f=await Promise.race([window.fbReady,new Promise(r=>setTimeout(()=>r(null),8000))]);
+ loadImgs();const f=await Promise.race([window.fbReady,new Promise(r=>setTimeout(()=>r(null),8000))]);
  if(f){me=f.uid;ref=f.ref;ref.onSnapshot(sn=>{if(!busy){G=sn.exists?sn.data():null;render()}},e=>{err='مشكلة في الاتصال';render()})}
  if(!ref)local=true;render()})();
 </script><script type="module">
