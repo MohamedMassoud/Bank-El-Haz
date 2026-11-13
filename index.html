@@ -60,6 +60,7 @@ small{color:var(--mut)}
 .tk{z-index:2}
 .sq span,.sq small{font-weight:700;text-shadow:0 0 3px var(--card),0 0 3px var(--card),0 0 5px var(--card)}
 .hero{width:100%;height:clamp(110px,30vw,200px);object-fit:cover;border-radius:10px;border:2px solid var(--bd);margin-bottom:6px;background:var(--card)}
+svg.hero{height:auto;max-height:260px}
 .pcard{display:flex;align-items:center;gap:8px;font-weight:700;font-size:clamp(10px,2.8vw,15px);max-width:100%}
 .pcard img{height:clamp(34px,12vw,84px);max-width:46vw;object-fit:cover;border-radius:8px;border:2px solid var(--bd)}
 </style></head><body>
@@ -170,7 +171,7 @@ function render(){
  calcFx(G0);const s=(MOVING&&VIEW)?VIEW:G0,st=s&&s.st;let h='';
  if(!st){
   const P=s?s.P:[],joined=!local&&P.some(x=>x.id===me);
-  h+=`<div class="panel">${IMG.hero?`<img class="hero" src="${esc(IMG.hero)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'<div class="hero" style="display:flex;align-items:center;justify-content:center;font-size:56px">🏺</div>'}<b>غرفة الانتظار</b> <small>${local?'(لعب على جهاز واحد)':'(أونلاين — افتح نفس اللينك مع صحابك)'}</small>`;
+  h+=`<div class="panel">${poster()}<b>غرفة الانتظار</b> <small>${local?'(لعب على جهاز واحد)':'(أونلاين — افتح نفس اللينك مع صحابك)'}</small>`;
   if(!local)h+=`<div><small>كود الغرفة: <b>${esc(ROOM)}</b> — ابعت اللينك ده لصحابك</small><input readonly value="${esc(location.href)}" onclick="this.select()" style="width:100%;margin:4px 0"></div>`;
   h+=P.map(p=>`<div class="pl"><span class="dot" style="background:${PC[p.c]}"></span>${esc(p.n)}</div>`).join('')||'<p><small>لسه محدش دخل</small></p>';
   if(!joined&&P.length<6)h+=`<div><input id="nm" placeholder="اسمك" maxlength="14"> <button onclick="act('join',document.getElementById('nm').value)">${local?'ضيف لاعب':'ادخل'}</button></div>`;
@@ -251,7 +252,7 @@ function playFx(s,dice,d){
  else if(FX.nw&&FX.nw.size)setTimeout(()=>sfx('buy'),d);
  else{const v=Object.values(FX.dm||{});if(v.some(x=>x<0))setTimeout(()=>sfx('pay'),d);else if(v.some(x=>x>0))setTimeout(()=>sfx('gain'),d)}}
 const IMG={},WP={};let IT=null;
-const WT={hero:'Giza_pyramid_complex',0:'Egyptian_pound',1:'Luxor',3:'Aswan',4:'Income_tax',5:'Cairo_International_Airport',6:'Alexandria',8:'Port_Said',9:'Sharm_El_Sheikh',10:'Prison',11:'Sanaa',12:'Power_station',13:'Khartoum',14:'Muscat,_Oman',15:'Suez',16:'Kuwait_City',18:'Doha',19:'Manama',20:'Parking_lot',21:'Beirut',23:'Amman',24:'Damascus',25:'Damietta',26:'Tunis',27:'Algiers',28:'Water_supply',29:'Rabat',30:'Handcuffs',31:'Abu_Dhabi',32:'Dubai',34:'Riyadh',35:'Ramses railway station Cairo',37:'Jeddah',38:'Luxury_tax',39:'Cairo',2:'Dice',7:'Dice',17:'Dice',22:'Dice',33:'Dice',36:'Dice'};
+const WT={0:'Egyptian_pound',1:'Luxor',3:'Aswan',4:'Income_tax',5:'Cairo_International_Airport',6:'Alexandria',8:'Port_Said',9:'Sharm_El_Sheikh',10:'Prison',11:'Sanaa',12:'Power_station',13:'Khartoum',14:'Muscat,_Oman',15:'Suez',16:'Kuwait_City',18:'Doha',19:'Manama',20:'Parking_lot',21:'Beirut',23:'Amman',24:'Damascus',25:'Damietta',26:'Tunis',27:'Algiers',28:'Water_supply',29:'Rabat',30:'Handcuffs',31:'Abu_Dhabi',32:'Dubai',34:'Riyadh',35:'Ramses railway station Cairo',37:'Jeddah',38:'Luxury_tax',39:'Cairo',2:'Dice',7:'Dice',17:'Dice',22:'Dice',33:'Dice',36:'Dice'};
 // Wikipedia lead image of an article (CORS-enabled API), cached in localStorage
 const wimg=t=>WP[t]||(WP[t]=(async()=>{
  try{const c=localStorage.getItem('wi2:'+t);if(c)return c}catch(e){}
@@ -262,7 +263,26 @@ const wimg=t=>WP[t]||(WP[t]=(async()=>{
  return u})());
 function loadImgs(){for(const k in WT)wimg(WT[k]).then(u=>{if(u){IMG[k]=u;clearTimeout(IT);IT=setTimeout(render,400)}})}
 const pcard=()=>{const q=S[CARD];return `<div class="pcard">${IMG[CARD]?`<img src="${esc(IMG[CARD])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span>${FL[CARD]||IC[q[1]]||''} ${esc(q[0])}</span></div>`};
-// lobby music: لو عندك ملف mp3 حطه جنب index.html واكتب اسمه هنا (مثلا 'music.mp3'). لو سبته فاضي هيشغل لحن عربي (مقام حجاز) متولد في المتصفح
+const poster=()=>`<svg class="hero" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="بنك الحظ">
+<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe45c"/><stop offset="1" stop-color="#ff9f1c"/></linearGradient>
+<pattern id="pp" width="40" height="40" patternUnits="userSpaceOnUse"><g fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.2"><rect x="8" y="8" width="24" height="24"/><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)"/></g></pattern></defs>
+<rect width="400" height="240" fill="url(#pg)"/><rect width="400" height="240" fill="url(#pp)"/>
+<circle cx="200" cy="110" r="140" fill="#fff" fill-opacity=".2"/>
+<g fill="#3b1d00"><rect x="0" y="198" width="400" height="42"/>
+<rect x="10" y="165" width="26" height="35"/><rect x="40" y="125" width="8" height="75"/><path d="M38 125L44 105L50 125z"/>
+<rect x="54" y="170" width="60" height="30"/><path d="M58 170a26 26 0 0 1 52 0z"/><rect x="83.2" y="132" width="1.6" height="13"/>
+<rect x="118" y="130" width="8" height="70"/><path d="M116 130L122 110L128 130z"/><rect x="134" y="155" width="22" height="45"/><rect x="160" y="172" width="34" height="28"/>
+<path d="M205 200L217 105L229 200z"/><rect x="216.5" y="90" width="1" height="16"/><rect x="236" y="150" width="24" height="50"/><rect x="264" y="168" width="30" height="32"/>
+<rect x="298" y="175" width="36" height="25"/><path d="M300 175a16 16 0 0 1 32 0z"/><rect x="340" y="128" width="8" height="72"/><path d="M338 128L344 108L350 128z"/><rect x="354" y="160" width="36" height="40"/></g>
+${GC.map((c,i)=>`<rect x="${i*50}" y="206" width="50" height="34" fill="${c}" stroke="#fff" stroke-width="2"/>`).join('')}
+<text x="200" y="92" text-anchor="middle" font-family="Tahoma,Arial,sans-serif" font-size="68" font-weight="900" fill="#c8102e" stroke="#fff" stroke-width="7" paint-order="stroke" stroke-linejoin="round">بنك الحظ</text>
+<rect x="85" y="104" width="230" height="26" rx="13" fill="#c8102e" stroke="#fff" stroke-width="2"/>
+<text x="200" y="122" text-anchor="middle" font-family="Tahoma,Arial,sans-serif" font-size="15" font-weight="700" fill="#fff">لعبة الزمن الجميل</text>
+<g transform="translate(26 22) rotate(-14 23 23)"><rect width="46" height="46" rx="8" fill="#fff" stroke="#2b2200" stroke-width="3"/><g fill="#c8102e"><circle cx="12" cy="12" r="4"/><circle cx="34" cy="12" r="4"/><circle cx="23" cy="23" r="4"/><circle cx="12" cy="34" r="4"/><circle cx="34" cy="34" r="4"/></g></g>
+<g transform="translate(330 30) rotate(12 23 23)"><rect width="46" height="46" rx="8" fill="#fff" stroke="#2b2200" stroke-width="3"/><g fill="#c8102e"><circle cx="12" cy="12" r="4"/><circle cx="23" cy="23" r="4"/><circle cx="34" cy="34" r="4"/></g></g>
+<g font-family="Tahoma,Arial,sans-serif" font-weight="900" font-size="15" text-anchor="middle" fill="#7a4b00"><circle cx="100" cy="32" r="13" fill="#ffd23f" stroke="#b8860b" stroke-width="2.5"/><text x="100" y="38">ج</text><circle cx="300" cy="28" r="10" fill="#ffd23f" stroke="#b8860b" stroke-width="2.5"/><text x="300" y="33" font-size="12">ج</text></g>
+</svg>`;
+// lobby music: لو عندك ملف mp3 حطه جنب index.html واكتب اسمه هنا (مثلا 'music.mp3'). لو سبته فاضي هيشغل لحن فانك بسلم عربي صغير (5 نغمات) متولد في المتصفح
 const LOBBY_MUSIC_URL='';
 let MG=null,MT=null,MA=null,INLOBBY=false;
 function musicSync(){if(INLOBBY&&!MUTE)musicStart();else musicStop()}
@@ -271,17 +291,27 @@ function musicStart(){
  if(MT||MA)return;
  if(LOBBY_MUSIC_URL){MA=new Audio(LOBBY_MUSIC_URL);MA.loop=true;MA.volume=.4;MA.play().catch(()=>{});return}
  const c=ac();if(!c)return;
- MG=c.createGain();MG.gain.value=.5;MG.connect(c.destination);
- const b=60/96,H=[293.66,311.13,369.99,392,440,466.16,523.25,587.33];
- const BARS=[[[4,1],[3,.5],[2,.5],[1,1],[0,1]],[[2,1],[3,.5],[4,.5],[5,1],[4,1]],[[7,1],[6,.5],[5,.5],[4,1],[3,1]],[[2,.5],[1,.5],[0,2],[-1,1]]];
- const N=(f,T,d,ty,v)=>{const o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f,T);fl.type='lowpass';fl.frequency.value=2200;g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(v,T+.015);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(fl);fl.connect(g);g.connect(MG);o.start(T);o.stop(T+d+.05)};
- const dum=T=>{const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(150,T);o.frequency.exponentialRampToValueAtTime(55,T+.15);g.gain.setValueAtTime(.5,T);g.gain.exponentialRampToValueAtTime(.001,T+.3);o.connect(g);g.connect(MG);o.start(T);o.stop(T+.35)};
- const tek=T=>{const n=Math.floor(c.sampleRate*.05),bf=c.createBuffer(1,n,c.sampleRate),a=bf.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='highpass';f.frequency.value=3000;s.buffer=bf;g.gain.value=.18;s.connect(f);f.connect(g);g.connect(MG);s.start(T)};
- const sched=(T,bar)=>{let t=T;BARS[bar].forEach(([d,l])=>{if(d>=0){N(H[d],t,l*b*.95,'sawtooth',.13);N(H[d]/2,t,l*b*.95,'triangle',.07)}t+=l*b});
-  N(146.83,T,4*b,'sine',.09);
-  [[0,dum],[1,tek],[3,tek],[4,dum],[6,tek]].forEach(([e,fn])=>fn(T+e*b/2))};
+ MG=c.createGain();MG.gain.value=.55;MG.connect(c.destination);
+ const q=60/104/4;
+ const FQ={E2:82.41,F2:87.31,G2:103.83,A2:110,B2:123.47,B3:246.94,E4:329.63,F4:349.23,G4:415.3,A4:440,B4:493.88};
+ const O=(f,T,d,ty,v,lp)=>{const o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f,T);fl.type='lowpass';fl.frequency.setValueAtTime(lp,T);fl.frequency.exponentialRampToValueAtTime(300,T+d);g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(v,T+.008);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(fl);fl.connect(g);g.connect(MG);o.start(T);o.stop(T+d+.03)};
+ const nz=(T,d,v,ty,f)=>{const n=Math.floor(c.sampleRate*d),bf=c.createBuffer(1,n,c.sampleRate),a=bf.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),g=c.createGain(),fl=c.createBiquadFilter();fl.type=ty;fl.frequency.value=f;g.gain.value=v;s.buffer=bf;s.connect(fl);fl.connect(g);g.connect(MG);s.start(T)};
+ const kick=T=>{const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(140,T);o.frequency.exponentialRampToValueAtTime(45,T+.12);g.gain.setValueAtTime(.7,T);g.gain.exponentialRampToValueAtTime(.001,T+.25);o.connect(g);g.connect(MG);o.start(T);o.stop(T+.3)};
+ const BASS=[[[0,'E2',1.5],[2,'E2',1],[5,'G2',1],[6,'A2',1],[8,'E2',1.5],[10,'F2',1],[11,'E2',1],[13,'B2',1],[14,'A2',1]],
+  [[0,'E2',1.5],[3,'E2',1],[4,'F2',1],[6,'E2',1],[8,'G2',1.5],[9,'A2',1],[11,'B2',1],[12,'A2',1],[14,'G2',1],[15,'F2',.8]]];
+ const LEAD=[[[2,'E4',1],[3,'F4',1],[5,'G4',2],[8,'A4',1],[10,'G4',1],[11,'F4',1],[12,'E4',3]],
+  [[0,'B3',1],[2,'E4',1],[3,'F4',1],[4,'G4',2],[7,'A4',1],[8,'B4',2],[11,'A4',1],[12,'G4',1],[13,'F4',1],[14,'E4',2]]];
+ const sched=(T,bar)=>{
+  const sw=i=>T+i*q+(i%2?q*.18:0);
+  BASS[bar].forEach(([i,n,l])=>O(FQ[n],sw(i),l*q*.9,'sawtooth',.28,900));
+  LEAD[bar].forEach(([i,n,l])=>O(FQ[n],sw(i),l*q*.95,'square',.09,2400));
+  [6,14].forEach(i=>['E4','G4','B4'].forEach(n=>O(FQ[n],sw(i),q*.8,'sawtooth',.04,2000)));
+  (bar?[0,7,10,13]:[0,7,10]).forEach(i=>kick(sw(i)));
+  [4,12].forEach(i=>{nz(sw(i),.13,.3,'bandpass',1800);O(190,sw(i),.08,'triangle',.2,3000)});
+  for(let i=0;i<16;i+=2)nz(sw(i),.03,.07,'highpass',7000);
+  nz(sw(14),.12,.08,'highpass',6000)};
  let nx=c.currentTime+.15,bar=0;
- MT=setInterval(()=>{while(nx<c.currentTime+.4){sched(nx,bar);nx+=4*b;bar=(bar+1)%4}},120)}
+ MT=setInterval(()=>{while(nx<c.currentTime+.4){sched(nx,bar);nx+=16*q;bar^=1}},120)}
 let RC=0;
 let bt=null;
 function botTick(){
