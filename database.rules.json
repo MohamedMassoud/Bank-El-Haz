@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "$room.matches(/^[a-zA-Z0-9_-]{1,20}$/)"
+      }
+    }
+  }
+}
