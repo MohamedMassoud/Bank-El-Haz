@@ -1,8 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff1a8">
 <title>بنك الحظ</title>
 <style>
+
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fff1a8;--card:#fffdf0;--tx:#2b2200;--mut:#6b5d1a;--ac:#c8102e;--bd:#2b2200;--btn:#c8102e;--btx:#fff}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1a0a;--card:#2a2610;--tx:#fff4c9;--mut:#cdbf7a;--ac:#ff6b7d;--bd:#fff4c9;--btn:#ff6b7d;--btx:#1d1a0a}}
@@ -63,66 +65,215 @@ small{color:var(--mut)}
 svg.hero{height:auto;max-height:260px}
 .pcard{display:flex;align-items:center;gap:8px;font-weight:700;font-size:clamp(10px,2.8vw,15px);max-width:100%}
 .pcard img{height:clamp(34px,12vw,84px);max-width:46vw;object-fit:cover;border-radius:8px;border:2px solid var(--bd)}
+/* ===== v3: responsive layout, 48-square board, ownership UI ===== */
+html{-webkit-text-size-adjust:100%}
+body{max-width:1100px;padding:8px;min-height:100dvh;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+h1{font-size:clamp(1.1rem,4.5vw,1.6rem)}
+button{min-height:46px;font-size:16px}
+input{font-size:16px;min-height:44px;max-width:100%}
+input[type=number]{width:110px}
+.board{grid-template-columns:1.5fr repeat(11,1fr) 1.5fr;grid-template-rows:1.5fr repeat(11,1fr) 1.5fr;max-width:min(100%,calc(100dvh - 16px));margin:auto}
+.mid{grid-area:2/2/13/13;overflow:hidden}
+.gm{display:block}
+.bcol,.scol{min-width:0}
+@media (min-width:900px){.gm{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}.scol .panel:first-child{margin-top:0}.ctl{position:sticky;top:8px;z-index:30}}
+@media (max-width:899px){.ctl{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:30;box-shadow:0 -4px 14px rgba(0,0,0,.28);max-height:52dvh;overflow:auto}}
+.sq{cursor:pointer;font-size:clamp(4.5px,1.25vw,9px)}
+.sq b{font-size:clamp(9px,2.6vw,20px)}
+.sq small{font-size:clamp(5.5px,1.65vw,10px)}
+.tk u{width:clamp(6px,2.1vw,13px);height:clamp(6px,2.1vw,13px)}
+@media (max-width:640px){.sq span{display:none}.mid .t{font-size:clamp(14px,5vw,24px)}.dice{font-size:clamp(24px,8vw,46px)}.log{font-size:10px}}
+.sq.own{box-shadow:inset 0 0 0 4px var(--oc)}
+.sq.own::after{content:'';position:absolute;inset:0;background:var(--oc);opacity:.32;z-index:0;pointer-events:none}
+.sq.free{box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.sq.mg{filter:grayscale(.9) brightness(.9)}
+.ob,.fr{position:absolute;top:1px;right:1px;z-index:3;font-style:normal}
+.ob{width:clamp(10px,3vw,19px);height:clamp(10px,3vw,19px);border-radius:50%;border:1.5px solid #fff;color:#fff;font-size:clamp(6px,1.9vw,12px);font-weight:800;display:flex;align-items:center;justify-content:center;text-shadow:none}
+.fr{font-size:clamp(7px,2.1vw,13px)}
+.hs{position:absolute;top:1px;left:1px;z-index:3;font-style:normal;font-size:clamp(5px,1.5vw,10px);line-height:1;max-width:60%;word-break:break-all}
+.rt{color:#fff!important;border-radius:6px;padding:0 3px;text-shadow:none!important;font-weight:800}
+.lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;margin-top:6px;color:var(--mut)}
+.lgd{display:inline-block;width:12px;height:12px;border-radius:3px;background:linear-gradient(90deg,#e63946,#1d6fd8);vertical-align:middle}
+.pb{border-inline-start:6px solid var(--oc);padding:4px 8px;margin:6px 0;border-radius:8px;background:rgba(127,127,127,.08)}
+.pb.turn{background:rgba(244,163,0,.22)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 4px}
+.chip{font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--bd);border-inline-start:5px solid #888;background:var(--card);cursor:pointer}
+.chip.sel{background:var(--ac);color:var(--btx)}
+.pd{font-size:clamp(9px,2.5vw,13px);font-weight:600;color:var(--mut);line-height:1.5}
+.ob2{display:inline-flex;width:18px;height:18px;border-radius:50%;color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:800;vertical-align:middle}
+.tcol{border:1px dashed var(--bd);border-radius:10px;padding:6px;margin:6px 0;text-align:start}
+.mid .pcard{max-width:96%}
+
 </style></head><body>
 <h1>🎲 بنك الحظ</h1>
-<button id="mu" class="s" onclick="mute()" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);inset-inline-start:8px;padding:4px 10px;margin:0;z-index:40">🔊</button><div id="toast"></div><div id="app"><p>جاري الاتصال…</p></div>
+<button id="mu" class="s" onclick="mute()" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);inset-inline-start:8px;padding:4px 10px;margin:0;min-height:0;z-index:40">🔊</button><span id="np" style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-start:56px;font-size:12px;color:var(--mut);z-index:40;pointer-events:none"></span><div id="toast"></div><div id="app"><p>جاري الاتصال…</p></div>
 <script>
-const S=[["البداية","go"],["الأقصر","p",60,0],["حظ","c"],["أسوان","p",60,0],["ضريبة دخل","t",200],["مطار القاهرة","r",200],["الإسكندرية","p",100,1],["حظ","c"],["بورسعيد","p",100,1],["شرم الشيخ","p",120,1],["السجن","j"],["صنعاء","p",140,2],["شركة الكهرباء","u",150],["الخرطوم","p",140,2],["مسقط","p",160,2],["ميناء السويس","r",200],["الكويت","p",180,3],["حظ","c"],["الدوحة","p",180,3],["المنامة","p",200,3],["استراحة","f"],["بيروت","p",220,4],["حظ","c"],["عمّان","p",220,4],["دمشق","p",240,4],["ميناء دمياط","r",200],["تونس","p",260,5],["الجزائر","p",260,5],["شركة المياه","u",150],["الرباط","p",280,5],["اذهب للسجن","g"],["أبوظبي","p",300,6],["دبي","p",300,6],["حظ","c"],["الرياض","p",320,6],["محطة مصر","r",200],["حظ","c"],["جدة","p",350,7],["ضريبة رفاهية","t",100],["القاهرة","p",400,7]];
-const FL={1:'🇪🇬',3:'🇪🇬',5:'🇪🇬',6:'🇪🇬',8:'🇪🇬',9:'🇪🇬',11:'🇾🇪',13:'🇸🇩',14:'🇴🇲',15:'🇪🇬',16:'🇰🇼',18:'🇶🇦',19:'🇧🇭',21:'🇱🇧',23:'🇯🇴',24:'🇸🇾',25:'🇪🇬',26:'🇹🇳',27:'🇩🇿',28:'💧',29:'🇲🇦',31:'🇦🇪',32:'🇦🇪',34:'🇸🇦',35:'🇪🇬',37:'🇸🇦',39:'🇪🇬'};
-const GC=['#8b5a2b','#7ec8e3','#e87fb5','#f39c34','#e03c31','#f2d11a','#2e9e5b','#2a5bd7'];
+// ===== data: 48 squares =====
+const N=48,JAIL=12,RAILS=[5,15,28,41],UTILS=[10,30];
+const S=[["البداية","go"],["الأقصر","p",60,0],["حظ","c"],["أسوان","p",60,0],["ضريبة دخل","t",200],["مطار القاهرة","r",200],["مرسى مطروح","p",100,1],["حظ","c"],["سيوة","p",100,1],["دهب","p",120,1],["شركة الكهرباء","u",150],["الغردقة","p",140,2],["السجن","j"],["شرم الشيخ","p",140,2],["الإسماعيلية","p",160,2],["ميناء السويس","r",200],["حظ","c"],["صنعاء","p",180,3],["الخرطوم","p",180,3],["مسقط","p",200,3],["حظ","c"],["الكويت","p",220,4],["الدوحة","p",220,4],["المنامة","p",240,4],["استراحة","f"],["بيروت","p",260,5],["عمّان","p",260,5],["دمشق","p",280,5],["ميناء دمياط","r",200],["حظ","c"],["شركة المياه","u",150],["تونس","p",300,6],["الجزائر","p",300,6],["الرباط","p",320,6],["حظ","c"],["طرابلس","p",340,7],["اذهب للسجن","g"],["أبوظبي","p",360,7],["دبي","p",360,7],["حظ","c"],["الرياض","p",380,8],["محطة مصر","r",200],["جدة","p",400,8],["الدمام","p",400,8],["الإسكندرية","p",440,9],["الجيزة","p",460,9],["القاهرة","p",500,9],["ضريبة رفاهية","t",100]];
+const GRP=[];S.forEach((q,i)=>{if(q[1]==='p')(GRP[q[3]]=GRP[q[3]]||[]).push(i)});
+const BUY=q=>q[1]==='p'||q[1]==='r'||q[1]==='u';
+const FL={1:'🇪🇬',3:'🇪🇬',5:'🇪🇬',6:'🇪🇬',8:'🇪🇬',9:'🇪🇬',10:'💡',11:'🇪🇬',13:'🇪🇬',14:'🇪🇬',15:'🇪🇬',17:'🇾🇪',18:'🇸🇩',19:'🇴🇲',21:'🇰🇼',22:'🇶🇦',23:'🇧🇭',25:'🇱🇧',26:'🇯🇴',27:'🇸🇾',28:'🇪🇬',30:'💧',31:'🇹🇳',32:'🇩🇿',33:'🇲🇦',35:'🇱🇾',37:'🇦🇪',38:'🇦🇪',40:'🇸🇦',41:'🇪🇬',42:'🇸🇦',43:'🇸🇦',44:'🇪🇬',45:'🇪🇬',46:'🇪🇬'};
+const GC=['#8b5a2b','#7ec8e3','#e87fb5','#f39c34','#e03c31','#f2d11a','#2e9e5b','#2a5bd7','#8e44ad','#16a085'];
 const PC=['#e63946','#1d6fd8','#2a9d4f','#9b59b6','#f4a300','#00a6a6'];
 const IC={go:'🏁',c:'❓',t:'💸',r:'🚆',u:'💡',j:'🚔',f:'🅿️',g:'👮'};
-const CARDS=[["البنك دفعلك أرباح +150","$",150],["مخالفة مرور -50","$",-50],["روح البداية وخد 200","m",0],["سافر شرم الشيخ ✈️","m",9],["روح القاهرة","m",39],["ادخل السجن! 🚔","j"],["عيد ميلادك: كل لاعب يدفعلك 20","a",20],["صلّحت العربية -100","$",-100],["كسبت جايزة يانصيب +200","$",200],["ارجع 3 خطوات","b",3]];
+const CARDS=[
+["أكلت كشري من عربية في وسط البلد واتسمّمت 🤢 ادفع 40","$",-40],
+["سائح فرنسي اتصور معاك قدام الأهرامات وسابلك بقشيش 📸 +120","$",120],
+["فاتورة الكهربا وصلت... ⚡ ادفع 150","$",-150],
+["ركبت ميكروباص والسواق قالك «ادفع اللي تحبه» 🚐 ادفع 30","$",-30],
+["كارت الشحن اللي لقيته في الجاكيت كان فيه رصيد! 📱 +200","$",200],
+["قبضت الجمعية يا معلم 💰 +180","$",180],
+["بطيخة حمرا من على الطريق طلعت حلوة 🍉 +50","$",50],
+["زحمة كوبري أكتوبر 🚗 ارجع 3 خطوات","b",3],
+["عيد ميلادك 🎂 كل لاعب يدفعلك 30","a",30],
+["عزمت صحابك على فول وطعمية 🥙 ادفع 25 لكل لاعب","p",25],
+["دورك في الجمعية: روح البداية وقبّض 💵","m",0],
+["إجازة على البحر 🏖️ سافر شرم الشيخ","m",13],
+["الحاج أبو العلا عايزك في الأقصر 🏺 روح الأقصر","m",1],
+["الحكومة نزلت حملة وراك! 🚔 ادخل السجن","j"],
+["بعت ترمس على الكورنيش 😎 +35","$",35],
+["ابن عمك رجع من الخليج وجابلك هدية 🎁 +160","$",160],
+["واحد قالك «ادخل في البورصة» وخسرت 📉 ادفع 120","$",-120],
+["الواي فاي فصل في نص الماتش 📶 ادفع 20 لراوتر جديد","$",-20],
+["الشيشة على حسابك النهاردة 💨 ادفع 45","$",-45],
+["اشتريت دقيق مدعم من الجمعية 🥖 +60","$",60],
+["كل لاعب بيحولك 40 على إنستا باي 📲","a",40],
+["خطيبتك سألتك: فين الشبكة؟ 💍 ادفع 200","$",-200],
+["تاكسي أبيض رفض يشغّل العداد 🚕 ادفع 55","$",-55],
+["ضريبة العقارات جت 🏠 ادفع 25 على كل بيت","r",25],
+["كسبت مسابقة أحسن كشري في مصر 🍲 +140","$",140],
+["الصاحب الجدع رجّعلك الفلوس اللي سلّفتهاله 🤝 +90","$",90],
+["بعت تذكرة ماتش في السوق السوداء 🎟️ +110","$",110],
+["النور قطع في نص العزومة 🕯️ ادفع 35","$",-35],
+["حكم الماتش ظلمك وجريت وراه 🤦 ادفع 60","$",-60],
+["الأسطى صلّح العجلة بـ 15 وقالك «ولا يهمك» 🚲","$",-15]];
+// ===== state helpers =====
 let G=null,me=null,ref=null,local=false,busy=false,err='';
 let ROOM=location.hash.slice(1).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,20);
 if(!ROOM){ROOM=Math.random().toString(36).slice(2,8);history.replaceState(null,'','#'+ROOM)}
 window.ROOM=ROOM;window.fbReady=new Promise(r=>{window.fbResolve=r});
 addEventListener('hashchange',()=>location.reload());
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fresh=()=>({st:0,P:[],O:{},t:0,ph:'roll',d:[1,1],log:[],w:null,again:false});
+const fresh=()=>({st:0,P:[],O:{},V:{},H:{},M:{},t:0,ph:'roll',d:[1,1],log:[],w:null,again:false,au:null,tr:null});
 const cur=s=>s.P[s.t];
 const L=(s,m)=>{s.log=[m,...s.log].slice(0,5)};
-const posOf=i=>i<=10?[11,11-i]:i<=20?[11-(i-10),1]:i<=30?[1,1+(i-20)]:[1+(i-30),11];
-
-function pay(s,p,to,amt){p.m-=amt;if(to!=null)s.P[to].m+=amt;if(p.m<0)bust(s,p)}
-function bust(s,p){const i=s.P.indexOf(p);p.out=true;p.m=0;for(const k in s.O)if(s.O[k]===i)delete s.O[k];L(s,p.n+' أفلس! 💀');const a=s.P.filter(x=>!x.out);if(a.length===1)s.w=s.P.indexOf(a[0])}
-function jail(s,p){p.pos=10;p.jail=1;L(s,p.n+' دخل السجن 🚔')}
+const posOf=i=>i<=12?[13,13-i]:i<=24?[13-(i-12),1]:i<=36?[1,1+(i-24)]:[1+(i-36),13];
+const hh=(s,k)=>(s.H&&s.H[k])||0,mg=(s,k)=>!!(s.M&&s.M[k]);
+const owned=(s,i,list)=>list.filter(k=>s.O[k]===i).length;
+const bcost=k=>Math.max(30,Math.round(S[k][2]*.5/10)*10);
+const ucost=k=>Math.round(S[k][2]/2*1.1);
+const grpH=(s,k)=>S[k][1]==='p'&&GRP[S[k][3]].some(x=>hh(s,x)>0);
+const HM=[0,5,14,32,50,75];
+// rent: base (x2 with full colour set), houses/hotel, x1.2 for every visit by a non-owner
+function rentOf(s,i,ds){
+ const q=S[i],o=s.O[i];if(o==null||mg(s,i))return 0;let r;
+ if(q[1]==='p'){const r0=q[2]/10,h=hh(s,i);r=h?r0*HM[h]:r0*(GRP[q[3]].every(k=>s.O[k]===o)?2:1)}
+ else if(q[1]==='r')r=25*2**(owned(s,o,RAILS)-1);
+ else r=(owned(s,o,UTILS)===2?10:4)*ds;
+ return Math.round(r*1.2**((s.V&&s.V[i])||0))}
+function canBuild(s,i,k){const q=S[k];if(q[1]!=='p'||s.O[k]!==i||s.au||s.tr)return false;const g=GRP[q[3]];
+ if(!g.every(x=>s.O[x]===i&&!mg(s,x)))return false;const h=hh(s,k);if(h>=5||h>Math.min(...g.map(x=>hh(s,x))))return false;return s.P[i].m>=bcost(k)}
+function canSell(s,k){return S[k][1]==='p'&&hh(s,k)>0&&hh(s,k)===Math.max(...GRP[S[k][3]].map(x=>hh(s,x)))}
+function canMort(s,k){return !mg(s,k)&&(S[k][1]!=='p'||GRP[S[k][3]].every(x=>hh(s,x)===0))}
+// ===== money, debt (auto-mortgage), bankruptcy =====
+function raise(s,p,need){
+ const i=s.P.indexOf(p);
+ while(p.m<need){
+  let best=-1,bh=0;for(const k in s.O)if(s.O[k]===i&&hh(s,k)>bh){bh=hh(s,k);best=+k}
+  if(best>=0){s.H[best]--;if(!s.H[best])delete s.H[best];p.m+=bcost(best)/2;L(s,`${p.n} باع بيت من ${S[best][0]} 🏚️`);continue}
+  let c=-1;for(const k in s.O)if(s.O[k]===i&&!mg(s,k)&&(c<0||S[k][2]<S[c][2]))c=+k;
+  if(c<0)break;
+  s.M=s.M||{};s.M[c]=1;p.m+=S[c][2]/2;L(s,`${p.n} رهن ${S[c][0]} عشان يدفع 🔒`)}}
+function pay(s,p,to,amt){
+ if(p.m<amt)raise(s,p,amt);
+ if(p.m>=amt){p.m-=amt;if(to!=null)s.P[to].m+=amt;return true}
+ if(to!=null)s.P[to].m+=p.m;p.m=0;bust(s,p,to);return false}
+function bust(s,p,to){
+ const i=s.P.indexOf(p);p.out=true;
+ for(const k in s.O)if(s.O[k]===i){
+  if(s.V)delete s.V[k];if(s.H)delete s.H[k];
+  if(to!=null&&to!==i)s.O[k]=to;else{delete s.O[k];if(s.M)delete s.M[k]}}
+ L(s,p.n+' أفلس! 💀');
+ const a=s.P.filter(x=>!x.out);if(a.length===1)s.w=s.P.indexOf(a[0])}
+function jail(s,p){p.pos=JAIL;p.jail=1;s.again=false;L(s,p.n+' دخل السجن 🚔')}
 function go(s,p,to){if(to<p.pos){p.m+=200;L(s,p.n+' عدّى البداية +200')}p.pos=to;land(s,p)}
-function owned(s,i,list){return list.filter(k=>s.O[k]===i).length}
+function card(s,p,i){
+ const c=CARDS[Math.floor(Math.random()*CARDS.length)],k=c[1];L(s,'❓ '+c[0]);
+ if(k==='$'){c[2]>0?p.m+=c[2]:pay(s,p,null,-c[2])}
+ else if(k==='m')go(s,p,c[2]);
+ else if(k==='j')jail(s,p);
+ else if(k==='a'){s.P.forEach((x,j)=>{if(j!==i&&!x.out)pay(s,x,i,c[2])})}
+ else if(k==='p'){s.P.forEach((x,j)=>{if(j!==i&&!x.out&&!p.out)pay(s,p,j,c[2])})}
+ else if(k==='b'){p.pos=(p.pos+N-c[2])%N;land(s,p)}
+ else if(k==='r'){let n=0;for(const q in s.O)if(s.O[q]===i)n+=hh(s,q);if(n)pay(s,p,null,c[2]*n)}}
 function land(s,p){
  const i=s.P.indexOf(p),q=S[p.pos],o=s.O[p.pos];s.ph='end';
- if(q[1]==='p'||q[1]==='r'||q[1]==='u'){
-  if(o===undefined){if(p.m>=q[2])s.ph='buy';else L(s,'مفيش فلوس كفاية تشتري '+q[0]);return}
-  if(o===i||s.P[o].out)return;
-  let r;
-  if(q[1]==='p'){const g=S.map((x,k)=>x[3]===q[3]&&x[1]==='p'?k:-1).filter(k=>k>=0);r=q[2]/10;if(g.every(k=>s.O[k]===o))r*=2}
-  else if(q[1]==='r')r=25*2**(owned(s,o,[5,15,25,35])-1);
-  else r=(owned(s,o,[12,28])===2?10:4)*(s.d[0]+s.d[1]);
-  r=Math.round(r);L(s,`${p.n} دفع ${r} إيجار لـ ${s.P[o].n}`);pay(s,p,o,r);return}
+ if(BUY(q)){
+  if(o===undefined){if(p.m>=q[2])s.ph='buy';else startAuction(s,p.pos,i);return}
+  if(o===i||s.P[o].out||mg(s,p.pos))return;
+  const r=rentOf(s,p.pos,s.d[0]+s.d[1]);s.V=s.V||{};s.V[p.pos]=(s.V[p.pos]||0)+1;
+  L(s,`${p.n} دفع ${r} إيجار لـ ${s.P[o].n} 📈`);pay(s,p,o,r);return}
  if(q[1]==='t'){L(s,`${p.n} دفع ${q[2]} ${q[0]}`);pay(s,p,null,q[2]);return}
  if(q[1]==='g'){jail(s,p);return}
- if(q[1]==='c'){
-  const c=CARDS[Math.floor(Math.random()*CARDS.length)];L(s,'❓ '+c[0]);
-  if(c[1]==='$'){c[2]>0?p.m+=c[2]:pay(s,p,null,-c[2])}
-  else if(c[1]==='m')go(s,p,c[2]);
-  else if(c[1]==='j')jail(s,p);
-  else if(c[1]==='a'){s.P.forEach((x,k)=>{if(k!==i&&!x.out)pay(s,x,i,c[2])})}
-  else if(c[1]==='b'){p.pos=(p.pos+37)%40;land(s,p)}
- }
-}
+ if(q[1]==='c')card(s,p,i)}
+// ===== auction =====
+function startAuction(s,sq,from){s.au={sq,bid:0,bidder:-1,cur:from,pass:[]};s.ph='auc';L(s,`🔨 مزاد على ${S[sq][0]}!`);aucNext(s)}
+function aucNext(s){
+ const a=s.au,act=s.P.map((p,k)=>(!p.out&&!a.pass.includes(k))?k:-1).filter(k=>k>=0),cand=act.filter(k=>k!==a.bidder);
+ if(!cand.length){endAuction(s);return}
+ let n=a.cur;for(let j=0;j<s.P.length;j++){n=(n+1)%s.P.length;if(cand.includes(n)){a.cur=n;return}}}
+function endAuction(s){const a=s.au;s.au=null;s.ph='end';
+ if(a.bidder>=0){const w=s.P[a.bidder];w.m-=a.bid;s.O[a.sq]=a.bidder;L(s,`🔨 ${w.n} كسب ${S[a.sq][0]} بـ ${a.bid}`)}
+ else L(s,`مفيش حد اشترى ${S[a.sq][0]}`)}
+function aucAct(s,k,arg){const a=s.au,p=s.P[a.cur];
+ if(k==='abid'){const nb=a.bid+(+arg||10);if(p.m<nb)return false;a.bid=nb;a.bidder=a.cur;L(s,`${p.n} زوّد لـ ${nb} 🔨`)}
+ else{a.pass.push(a.cur);L(s,`${p.n} انسحب من المزاد`)}
+ aucNext(s);return true}
+// ===== trading =====
+function validTrade(s,t){
+ const A=s.P[t.from],B=s.P[t.to];if(!A||!B||A.out||B.out||t.from===t.to)return false;
+ if(t.gm<0||t.wm<0||A.m<t.gm||B.m<t.wm)return false;
+ if(!t.gp.every(k=>s.O[k]===t.from&&!grpH(s,k))||!t.wp.every(k=>s.O[k]===t.to&&!grpH(s,k)))return false;
+ return t.gm+t.wm+t.gp.length+t.wp.length>0}
+function execTrade(s,t){
+ const A=s.P[t.from],B=s.P[t.to];A.m+=t.wm-t.gm;B.m+=t.gm-t.wm;
+ t.gp.forEach(k=>{s.O[k]=t.to;if(s.V)delete s.V[k]});t.wp.forEach(k=>{s.O[k]=t.from;if(s.V)delete s.V[k]});
+ L(s,`🤝 صفقة بين ${A.n} و ${B.n}`)}
+function trSend(s,arg){
+ let o;try{o=JSON.parse(arg)}catch(e){return false}
+ const ints=a=>(Array.isArray(a)?a:[]).map(Number).filter(k=>k>=0&&k<N);
+ const t={from:s.t,to:+o.to,gm:Math.max(0,Math.floor(+o.gm||0)),wm:Math.max(0,Math.floor(+o.wm||0)),gp:ints(o.gp),wp:ints(o.wp)};
+ if(!validTrade(s,t))return false;
+ s.tr=t;L(s,`${s.P[t.from].n} بعت عرض تبادل لـ ${s.P[t.to].n} 🤝`);return true}
+function trAct(s,k){const t=s.tr;
+ if(k==='tcancel'){L(s,'العرض اتلغى');s.tr=null;return true}
+ if(k==='trej'){L(s,`${s.P[t.to].n} رفض العرض ❌`);s.tr=null;return true}
+ if(k==='tacc'){if(validTrade(s,t))execTrade(s,t);else L(s,'العرض ما بقاش صالح');s.tr=null;return true}
+ return false}
+// ===== buildings / mortgage =====
+function propAct(s,k,sq){
+ const i=s.t,p=s.P[i];if(!(sq>=0&&sq<N)||s.O[sq]!==i)return false;
+ s.H=s.H||{};s.M=s.M||{};const n=S[sq][0];
+ if(k==='bld'){if(!canBuild(s,i,sq))return false;p.m-=bcost(sq);s.H[sq]=hh(s,sq)+1;L(s,`${p.n} بنى ${s.H[sq]>=5?'فندق 🏨':'بيت 🏠'} في ${n}`);return true}
+ if(k==='sell'){if(!canSell(s,sq))return false;p.m+=bcost(sq)/2;s.H[sq]--;if(!s.H[sq])delete s.H[sq];L(s,`${p.n} باع بيت من ${n}`);return true}
+ if(k==='mort'){if(!canMort(s,sq))return false;s.M[sq]=1;p.m+=S[sq][2]/2;L(s,`${p.n} رهن ${n} 🔒 وخد ${S[sq][2]/2}`);return true}
+ if(k==='unmort'){if(!mg(s,sq)||p.m<ucost(sq))return false;p.m-=ucost(sq);delete s.M[sq];L(s,`${p.n} فك رهن ${n} 🔓`);return true}
+ return false}
+// ===== turn flow =====
 function doRoll(s){
  const p=cur(s),d=[1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)],dbl=d[0]===d[1];s.d=d;s.rc=(s.rc||0)+1;
- const step=()=>{const n=(p.pos+d[0]+d[1])%40;if(n<p.pos){p.m+=200;L(s,p.n+' عدّى البداية +200')}p.pos=n;land(s,p)};
+ const step=()=>{const n=(p.pos+d[0]+d[1])%N;if(n<p.pos){p.m+=200;L(s,p.n+' عدّى البداية +200')}p.pos=n;land(s,p)};
  if(p.jail>0){
   if(dbl){p.jail=0;L(s,p.n+' طلع من السجن بدبل!');step()}
   else{p.jail++;if(p.jail>3){p.jail=0;L(s,p.n+' دفع 50 وخرج');pay(s,p,null,50);if(!p.out)step()}else{L(s,p.n+' لسه في السجن');s.ph='end'}}
   s.again=false;return}
- step();s.again=dbl&&!p.jail&&!p.out&&s.w==null;
-}
+ step();
+ // a double keeps the extra roll no matter which square (even a luck card) was hit; only jail / bankruptcy / game over cancel it
+ s.again=dbl&&!p.jail&&!p.out&&s.w==null}
 function endTurn(s){
  if(s.again&&!cur(s).out){s.again=false;s.ph='roll';return}
- do{s.t=(s.t+1)%s.P.length}while(cur(s).out);s.ph='roll';s.again=false;
-}
+ do{s.t=(s.t+1)%s.P.length}while(cur(s).out);s.ph='roll';s.again=false}
 function act(k,arg){
  if(busy)return;const s=G?JSON.parse(JSON.stringify(G)):fresh();
  if(k==='join'){
@@ -133,44 +284,126 @@ function act(k,arg){
  else if(k==='bot'){if(s.P.length>=6)return;const nb=s.P.filter(x=>x.bot).length+1;s.P.push({id:'bot'+s.P.length,n:'🤖 بوت '+nb,c:s.P.length,pos:0,m:1500,jail:0,out:false,bot:true})}
  else if(k==='start'){if(s.P.length<2)return;s.st=1;s.t=0;s.ph='roll';L(s,'اللعبة بدأت! 🎉')}
  else if(k==='reset'){if(Date.now()>RC){RC=Date.now()+3000;render();setTimeout(render,3100);return}RC=0;Object.assign(s,fresh())}
- else{const p=cur(s);
-  if(k==='roll'&&s.ph==='roll')doRoll(s);
+ else{
+  if(!s.st||s.w!=null)return;
+  const p=cur(s),mid=s.ph==='roll'||s.ph==='end';
+  if(s.au){if(!(k==='abid'||k==='apass')||!aucAct(s,k,arg))return}
+  else if(s.tr){if(!trAct(s,k))return}
+  else if(k==='roll'&&s.ph==='roll')doRoll(s);
   else if(k==='buy'&&s.ph==='buy'){const q=S[p.pos];p.m-=q[2];s.O[p.pos]=s.t;s.ph='end';L(s,`${p.n} اشترى ${q[0]} 🏠`)}
-  else if(k==='skip'&&s.ph==='buy')s.ph='end';
+  else if(k==='skip'&&s.ph==='buy')startAuction(s,p.pos,s.t);
   else if(k==='end'&&s.ph==='end')endTurn(s);
   else if(k==='payj'&&p.jail>0&&s.ph==='roll'){p.jail=0;pay(s,p,null,50);L(s,p.n+' دفع 50 وخرج من السجن')}
+  else if(mid&&(k==='bld'||k==='sell'||k==='mort'||k==='unmort')){if(!propAct(s,k,+arg))return}
+  else if(mid&&k==='tsend'){if(!trSend(s,arg))return}
   else return}
  save(s)}
 async function save(s){
  G=s;render();if(!ref)return;busy=true;
  try{await ref.set(s);err=''}catch(e){err='مش قادر أحفظ الحركة: '+(e&&e.message||'')}
  busy=false;render()}
+// ===== bots =====
+function bVal(s,i,k){const q=S[k];let v=q[2]*(mg(s,k)?.6:1);if(q[1]==='p'&&GRP[q[3]].every(x=>x===k||s.O[x]===i))v*=1.5;return v}
+function botTrade(s){const t=s.tr;if(!validTrade(s,t))return false;
+ const got=t.gm+t.gp.reduce((a,k)=>a+bVal(s,t.to,k),0),gave=t.wm+t.wp.reduce((a,k)=>a+bVal(s,t.from,k)+(bVal(s,t.from,k)>S[k][2]?S[k][2]:0),0);
+ return got>=gave*1.1}
+function botBuild(s){const i=s.t,p=s.P[i];if(p.m<500)return null;
+ let b=null;for(const k in s.O)if(s.O[k]===i&&canBuild(s,i,+k)&&p.m-bcost(+k)>300&&(b===null||bcost(+k)<bcost(b)))b=+k;return b}
+function botTick(){
+ if(bt||busy||MOVING||!G||!G.st||G.w!=null)return;
+ const s=G,h=s.P.find(x=>!x.bot);if(!local&&(!h||h.id!==me))return;
+ let k=null,arg,ms=1000;
+ if(s.tr){if(s.P[s.tr.to].bot){k=botTrade(s)?'tacc':'trej';ms=1500}}
+ else if(s.au){const a=s.au,p=s.P[a.cur];if(p.bot){const q=S[a.sq],v=q[2]*(q[1]==='p'&&GRP[q[3]].every(x=>x===a.sq||s.O[x]===a.cur)?1.5:.85);
+  if(a.bid+10<=v&&p.m>=a.bid+10){k='abid';arg=10}else k='apass';ms=700}}
+ else{const p=cur(s);if(p&&p.bot){
+  if(s.ph==='roll')k=p.jail>0&&p.m>300?'payj':'roll';
+  else if(s.ph==='buy')k=p.m-S[p.pos][2]>=150?'buy':'skip';
+  else if(s.ph==='end'){const b=botBuild(s);if(b!==null){k='bld';arg=b}else k='end'}}}
+ if(!k)return;
+ bt=later(()=>{bt=null;if(MOVING||busy||!G)return;act(k,arg)},ms)}
+// ===== rendering =====
+const D='⚀⚁⚂⚃⚄⚅';
+const iconOf=i=>FL[i]||IC[S[i][1]]||'';
+const ini=n=>Array.from(n)[0]||'?';
 function board(s){
  let h='';
- for(let i=0;i<40;i++){
-  const q=S[i],[r,c]=posOf(i),o=s.O[i],tk=s.P.map((p,k)=>!p.out&&(DP[k]!==undefined?DP[k]:p.pos)===i?`<u class="${k===s.t&&s.w==null?'cur':''}" style="background:${PC[p.c]};animation-delay:-${(Date.now()%1000)/1000}s"></u>`:'').join(''),pop=fx('pop')&&fx('pop').has(i),nw=fx('nw')&&fx('nw').has(i);
-  h+=`<div class="sq${pop?' pop':''}${nw?' nw':''}" style="grid-area:${r}/${c};${o!=null?`box-shadow:inset 0 0 0 3px ${PC[s.P[o].c]}`:''}${(pop||nw)?';'+ad(FX.ls):''}">${IMG[i]?`<img class="ph" src="${esc(IMG[i])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${q[1]==='p'?`<i style="background:${GC[q[3]]}"></i>`:''}<b>${FL[i]||IC[q[1]]||''}</b><span>${esc(q[0])}</span>${q[2]?`<small>${q[2]}</small>`:''}<div class="tk">${tk}</div></div>`}
- const D='⚀⚁⚂⚃⚄⚅';
- h+=`<div class="mid"><div class="t" style="animation-delay:-${(Date.now()%2500)/1000}s">بنك الحظ</div>${pcard()}<div class="dice${fxr()?' roll':''}"${fxr()?` style="${ad(FX.rs)}"`:''}>${D[s.d[0]-1]}${D[s.d[1]-1]}</div><div class="log">${s.log.map(esc).join('<br>')}</div></div>`;
+ for(let i=0;i<N;i++){
+  const q=S[i],[r,c]=posOf(i),o=s.O[i],by=BUY(q),ow=by&&o!=null?s.P[o]:null,oc=ow?PC[ow.c]:'',hs=hh(s,i),m=ow&&mg(s,i),
+   tk=s.P.map((p,k)=>!p.out&&(DP[k]!==undefined?DP[k]:p.pos)===i?`<u class="${k===s.t&&s.w==null?'cur':''}" style="background:${PC[p.c]};animation-delay:-${(Date.now()%1000)/1000}s"></u>`:'').join(''),
+   pop=fx('pop')&&fx('pop').has(i),nw=fx('nw')&&fx('nw').has(i),vv=(s.V&&s.V[i])||0;
+  h+=`<div class="sq${pop?' pop':''}${nw?' nw':''}${by?(ow?' own':' free'):''}${m?' mg':''}" onclick="pick(${i})" style="grid-area:${r}/${c};${ow?`--oc:${oc}`:''}${(pop||nw)?';'+ad(FX.ls):''}">${IMG[i]?`<img class="ph" src="${esc(IMG[i])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}${q[1]==='p'?`<i style="background:${GC[q[3]]}"></i>`:''}${ow?`<em class="ob" style="background:${oc}">${esc(ini(ow.n))}</em>`:by?'<em class="fr">🏷️</em>':''}${hs?`<em class="hs">${hs>=5?'🏨':'🏠'.repeat(hs)}</em>`:''}<b>${iconOf(i)}</b><span>${esc(q[0])}</span>${by?(ow?`<small class="rt" style="background:${oc}">${m?'🔒':(q[1]==='u'?'≈':'')+rentOf(s,i,7)+(vv?'📈':'')}</small>`:`<small>${q[2]}</small>`):q[2]?`<small>${q[2]}</small>`:''}<div class="tk">${tk}</div></div>`}
+ h+=`<div class="mid"><div class="t" style="animation-delay:-${(Date.now()%2500)/1000}s">بنك الحظ</div>${pcard(s)}<div class="dice${fxr()?' roll':''}"${fxr()?` style="${ad(FX.rs)}"`:''}>${D[s.d[0]-1]}${D[s.d[1]-1]}</div><div class="log">${s.log.map(esc).join('<br>')}</div></div>`;
  return h}
+function pcard(s){
+ const q=S[CARD],by=BUY(q),o=by?s.O[CARD]:undefined,ow=o!=null?s.P[o]:null;let d='';
+ if(by)d=ow?`<span class="ob2" style="background:${PC[ow.c]}">${esc(ini(ow.n))}</span> ${esc(ow.n)} — ${mg(s,CARD)?'مرهون 🔒':'إيجار '+rentOf(s,CARD,7)}${hh(s,CARD)?' · '+(hh(s,CARD)>=5?'🏨':'🏠'.repeat(hh(s,CARD))):''}${(s.V&&s.V[CARD])?' 📈×'+s.V[CARD]:''}`:`🏷️ للبيع بـ ${q[2]}`;
+ return `<div class="pcard">${IMG[CARD]?`<img src="${esc(IMG[CARD])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<div><div>${iconOf(CARD)} ${esc(q[0])}</div><div class="pd">${d}</div></div></div>`}
+function pick(i){CARD=i;sfx('tap');render()}
+const Bt=(k,t,c,a,dis)=>`<button class="${c||''}"${dis?' disabled':''} onclick="act('${k}'${a!==undefined?','+a:''})">${t}</button>`;
+function sqPanel(s){
+ const q=S[CARD];if(!BUY(q))return '';
+ const o=s.O[CARD],ow=o!=null?s.P[o]:null,i=s.t,p=s.P[i];
+ const can=!MOVING&&s.w==null&&(s.ph==='roll'||s.ph==='end')&&!s.au&&!s.tr&&p&&!p.bot&&(local||p.id===me)&&o===i;
+ let h=`<div class="panel"><b>${iconOf(CARD)} ${esc(q[0])}</b> <small>(${q[2]} ج)</small><div class="pd">`;
+ if(q[1]==='p'){const r0=q[2]/10;h+=`إيجار ${r0} · مجموعة كاملة ${r0*2} · 🏠${r0*HM[1]} · 🏠🏠${r0*HM[2]} · 🏠×3 ${r0*HM[3]} · 🏠×4 ${r0*HM[4]} · 🏨 ${r0*HM[5]}<br>تكلفة البيت ${bcost(CARD)} ج`}
+ else if(q[1]==='r')h+='إيجار 25 ← 50 ← 100 ← 200 حسب عدد المحطات';
+ else h+='إيجار 4× النرد (10× لو معاك الاتنين)';
+ h+=`<br>📈 الإيجار بيزيد 20% مع كل زيارة${(s.V&&s.V[CARD])?` (اتزار ${s.V[CARD]} مرة)`:''}<br>${ow?`المالك: <span class="ob2" style="background:${PC[ow.c]}">${esc(ini(ow.n))}</span> ${esc(ow.n)}${mg(s,CARD)?' · مرهون 🔒':''}`:'🏷️ متاح للشراء'}</div>`;
+ if(can){
+  if(canBuild(s,i,CARD))h+=Bt('bld','🏠 ابني ('+bcost(CARD)+')','',CARD);
+  if(canSell(s,CARD))h+=Bt('sell','بيع بيت (+'+bcost(CARD)/2+')','s',CARD);
+  if(!mg(s,CARD)&&canMort(s,CARD))h+=Bt('mort','🔒 ارهن (+'+q[2]/2+')','s',CARD);
+  if(mg(s,CARD))h+=Bt('unmort','🔓 فك الرهن ('+ucost(CARD)+')','',CARD,p.m<ucost(CARD))}
+ return h+'</div>'}
+const money=(m,list)=>[m?m+' ج':'',...list.map(k=>iconOf(k)+' '+S[k][0])].filter(Boolean).join(' + ')||'—';
+function aucUI(s){
+ const a=s.au,q=S[a.sq],c=s.P[a.cur],mineT=!c.bot&&(local||c.id===me);
+ return `<b>🔨 مزاد على ${iconOf(a.sq)} ${esc(q[0])}</b><br><small>سعره ${q[2]} · أعلى عرض: ${a.bid?a.bid+' من '+esc(s.P[a.bidder].n):'لسه محدش'}</small><br>`+(mineT?`دورك تزايد يا ${esc(c.n)}:<br>`+[10,50,100].map(v=>Bt('abid','+'+v,'',v,c.m<a.bid+v)).join('')+Bt('apass','انسحب','s'):`⏳ دور ${esc(c.n)}…`)}
+function trUI(s){
+ const t=s.tr,A=s.P[t.from],B=s.P[t.to],toMe=!B.bot&&(local||B.id===me),fromMe=!A.bot&&(local||A.id===me);
+ return `<b>🤝 عرض تبادل</b><div class="pd" style="color:var(--tx)">${esc(A.n)} يدّي: ${money(t.gm,t.gp)}<br>${esc(B.n)} يدّي: ${money(t.wm,t.wp)}</div>`+(toMe?Bt('tacc','✅ قبول')+Bt('trej','❌ رفض','s'):fromMe?`⏳ مستني رد ${esc(B.n)} `+Bt('tcancel','إلغاء العرض','s'):`⏳ ${esc(B.n)} بيفكر…`)}
+let TD=null;
+function openTrade(){TD={to:-1,gm:0,wm:0,gp:[],wp:[]};sfx('click');render()}
+function tdTo(k){TD.to=k;TD.gp=[];TD.wp=[];render()}
+function tdTog(side,k){const a=TD[side],i=a.indexOf(k);i<0?a.push(k):a.splice(i,1);render()}
+function tdSend(){if(!TD||TD.to<0)return;const o=JSON.stringify(TD);TD=null;act('tsend',o)}
+function tradeUI(s){
+ const i=s.t,A=s.P[i],oth=s.P.map((p,k)=>k).filter(k=>k!==i&&!s.P[k].out);
+ const lst=(idx,side)=>S.map((q,k)=>k).filter(k=>s.O[k]===idx&&!grpH(s,k)).map(k=>`<span class="chip${TD[side].includes(k)?' sel':''}" onclick="tdTog('${side}',${k})">${iconOf(k)} ${esc(S[k][0])}${mg(s,k)?' 🔒':''}</span>`).join('')||'<small>مفيش</small>';
+ let h='<b>🤝 تبادل</b><br>مع مين؟ '+oth.map(k=>`<button class="${TD.to===k?'':'s'}" onclick="tdTo(${k})">${esc(s.P[k].n)}</button>`).join('');
+ if(TD.to>=0)h+=`<div class="tcol"><b>هتدّي:</b> 💰<input id="tgm" type="number" min="0" max="${A.m}" value="${TD.gm}" oninput="TD.gm=+this.value||0"><div class="chips">${lst(i,'gp')}</div></div><div class="tcol"><b>عايز:</b> 💰<input id="twm" type="number" min="0" value="${TD.wm}" oninput="TD.wm=+this.value||0"><div class="chips">${lst(TD.to,'wp')}</div></div><button onclick="tdSend()">📨 ابعت العرض</button>`;
+ return h+'<button class="s" onclick="TD=null;render()">إلغاء</button>'}
 function controls(s){
  if(s.w!=null)return `<b>🏆 الفايز: ${esc(s.P[s.w].n)} — مبروك!</b>`;
+ if(MOVING)return '<b>🎲 …</b>';
+ if(s.au)return aucUI(s);
+ if(s.tr)return trUI(s);
  const p=cur(s),my=local||p.id===me;
- if(MOVING)return `<b>🎲 …</b>`;
  if(p.bot)return `<b>🤖 ${esc(p.n)} بيلعب…</b>`;
- if(!my)return `<b>⏳ دور ${esc(p.n)}…</b>`;
- const B=(k,t,c)=>`<button class="${c||''}" onclick="act('${k}')">${t}</button>`;
+ if(!my){TD=null;return `<b>⏳ دور ${esc(p.n)}…</b>`}
+ if(TD&&(s.ph==='roll'||s.ph==='end'))return tradeUI(s);
+ TD=null;
  let h=`<b>دورك يا ${esc(p.n)}</b><br>`;
- if(s.ph==='roll')h+=B('roll',p.jail>0?'🎲 ارمي (دبل يخرجك)':'🎲 ارمي النرد')+(p.jail>0?B('payj','💰 ادفع 50 واخرج','s'):'');
- if(s.ph==='buy')h+=B('buy',`🏠 اشتري ${esc(S[p.pos][0])} بـ ${S[p.pos][2]}`)+B('skip','تخطى','s');
- if(s.ph==='end')h+=B('end',s.again?'🎲 ارمي تاني (دبل!)':'خلّص دورك');
+ if(s.ph==='roll')h+=Bt('roll',p.jail>0?'🎲 ارمي (دبل يخرجك)':'🎲 ارمي النرد')+(p.jail>0?Bt('payj','💰 ادفع 50 واخرج','s'):'');
+ if(s.ph==='buy')h+=Bt('buy',`🏠 اشتري ${esc(S[p.pos][0])} بـ ${S[p.pos][2]}`,'',undefined,p.m<S[p.pos][2])+Bt('skip','🔨 مزاد','s');
+ if(s.ph==='end')h+=Bt('end',s.again?'🎲 ارمي تاني (دبل!)':'خلّص دورك');
+ if((s.ph==='roll'||s.ph==='end')&&s.P.filter(x=>!x.out).length>1)h+='<button class="s" onclick="openTrade()">🤝 تبادل</button>';
  return h}
+function playersHTML(s){
+ return s.P.map((p,i)=>{
+  const ow=Object.keys(s.O).map(Number).filter(k=>s.O[k]===i).sort((a,b)=>a-b),dm=fx('dm')&&fx('dm')[i];
+  return `<div class="pb${i===s.t&&s.w==null?' turn':''}" style="--oc:${PC[p.c]}"><div class="pl ${p.id===me?'me':''}"><span class="dot" style="background:${PC[p.c]}"></span>${i===s.t&&s.w==null?'▶ ':''}${esc(p.n)}${p.id===me?' (أنت)':''} — 💰 ${p.m} — 🏠 ${ow.length}${p.jail?' 🚔':''}${p.out?' 💀':''}${dm?`<b class="fl ${dm>0?'up':'dn'}" style="${ad(FX.ls)}">${dm>0?'+':''}${dm}</b>`:''}</div>${ow.length?`<div class="chips">${ow.map(k=>`<span class="chip" style="border-inline-start-color:${S[k][1]==='p'?GC[S[k][3]]:'#888'}" onclick="pick(${k})">${iconOf(k)} ${esc(S[k][0])}${hh(s,k)?' '+(hh(s,k)>=5?'🏨':'🏠'.repeat(hh(s,k))):''}${mg(s,k)?' 🔒':''}</span>`).join('')}</div>`:''}</div>`}).join('')}
+let LPN=-1,PST0=-1;
 function render(){
  const a=document.getElementById('app'),G0=G;
- if(!G0&&!ref&&!local){return}
+ if(!G0&&!ref&&!local)return;
  calcFx(G0);const s=(MOVING&&VIEW)?VIEW:G0,st=s&&s.st;let h='';
+ if(st&&PST0===0)sfx('start');PST0=st?1:0;
+ if(s&&s.au)CARD=s.au.sq;
  if(!st){
-  const P=s?s.P:[],joined=!local&&P.some(x=>x.id===me);
+  const P=s?s.P:[];if(LPN>=0&&P.length>LPN)sfx('join');LPN=P.length;
+  const joined=!local&&P.some(x=>x.id===me);
   h+=`<div class="panel">${poster()}<b>غرفة الانتظار</b> <small>${local?'(لعب على جهاز واحد)':'(أونلاين — افتح نفس اللينك مع صحابك)'}</small>`;
   if(!local)h+=`<div><small>كود الغرفة: <b>${esc(ROOM)}</b> — ابعت اللينك ده لصحابك</small><input readonly value="${esc(location.href)}" onclick="this.select()" style="width:100%;margin:4px 0"></div>`;
   h+=P.map(p=>`<div class="pl"><span class="dot" style="background:${PC[p.c]}"></span>${esc(p.n)}</div>`).join('')||'<p><small>لسه محدش دخل</small></p>';
@@ -180,89 +413,13 @@ function render(){
   else if(P.length>=2)h+=`<p><small>مستنيين ${esc(P[0].n)} يبدأ اللعبة</small></p>`;
   h+=`</div>`}
  else{
-  h+=`<div class="board${fx('shake')?' shake':''}"${fx('shake')?` style="${ad(FX.ls)}"`:''}>${board(s)}</div><div class="panel" style="text-align:center">${controls(s)}</div><div class="panel">`;
-  h+=s.P.map((p,i)=>`<div class="pl ${p.id===me?'me':''}"><span class="dot" style="background:${PC[p.c]}"></span>${i===s.t&&s.w==null?'▶ ':''}${esc(p.n)}${p.id===me?' (أنت)':''} — 💰 ${p.m} — 🏠 ${Object.values(s.O).filter(v=>v===i).length}${p.jail?' 🚔':''}${p.out?' 💀':''}${fx('dm')&&fx('dm')[i]?`<b class="fl ${fx('dm')[i]>0?'up':'dn'}" style="${ad(FX.ls)}">${fx('dm')[i]>0?'+':''}${fx('dm')[i]}</b>`:''}</div>`).join('');
-  h+=`<button class="s" id="rs" onclick="act('reset')">${Date.now()<RC?'متأكد؟ اضغط تاني':'لعبة جديدة'}</button></div>`}
+  h+=`<div class="gm"><div class="bcol"><div class="board${fx('shake')?' shake':''}"${fx('shake')?` style="${ad(FX.ls)}"`:''}>${board(s)}</div><div class="lg"><span>🏷️ للبيع</span><span><i class="lgd"></i> مملوك: لون وحرف صاحبه + الإيجار الحالي</span><span>📈 الإيجار بيزيد مع كل زيارة</span><span>🔒 مرهون</span><span>اضغط على أي مكان لتفاصيله</span></div></div><div class="scol"><div class="panel ctl" style="text-align:center">${controls(s)}</div>${sqPanel(s)}<div class="panel">${playersHTML(s)}<button class="s" id="rs" onclick="act('reset')">${Date.now()<RC?'متأكد؟ اضغط تاني':'لعبة جديدة'}</button></div></div></div>`}
  if(err)h+=`<p style="color:var(--ac)">${esc(err)}</p>`;
- h+=`<p><small>القواعد: كل لاعب يبدأ بـ 1500 جنيه، البداية +200، السجن بدبل أو 50 جنيه، آخر واحد ما يفلسش يكسب. (من غير بيوت وفنادق في النسخة دي.)<br>الصور من ويكيبيديا (Wikimedia Commons) بتراخيص مفتوحة.</small></p>`;
- const ae=document.activeElement,nm=document.getElementById('nm'),v=nm&&nm.value;
+ h+=`<p><small>القواعد: كل لاعب يبدأ بـ 1500 جنيه، البداية +200، السجن بدبل أو 50. الإيجار بيزيد 20% كل مرة حد غير المالك يزور المكان 📈. المجموعة الكاملة بتضاعف الإيجار وتقدر تبني بيوت وفنادق. لو معاك مش كفاية بتترهن أملاكك أوتوماتيك قبل الإفلاس. آخر واحد ما يفلسش يكسب.<br>الصور من ويكيبيديا (Wikimedia Commons) بتراخيص مفتوحة.</small></p>`;
+ const ae=document.activeElement,aid=ae&&ae.id,av=aid&&ae.value;
  a.innerHTML=h;
- if(v){const n2=document.getElementById('nm');if(n2){n2.value=v;if(ae===nm)n2.focus()}}
+ if(aid){const e2=document.getElementById(aid);if(e2){if(av!==undefined&&av!=='')e2.value=av;e2.focus()}}
  INLOBBY=!st;musicSync();botTick()}
-let PP=null,PS=null,VIEW=null,CARD=0,PO={},PM=[],PJ=[],PR,PL='',WON=false,FX={},SIG='',DP=[],MOVING=false,AT=null;
-const STEP=180;
-const fx=k=>FX.ls&&Date.now()<FX.ls+1700&&FX[k];
-const fxr=()=>FX.roll&&FX.rs&&Date.now()<FX.rs+900;
-const ad=t=>`animation-delay:${(-(Date.now()-t)/1000).toFixed(2)}s`;
-function toast(t){const e=document.getElementById('toast');if(!e)return;e.textContent=t;e.classList.remove('on');void e.offsetWidth;e.classList.add('on')}
-function confetti(){const c=['#e63946','#f4a300','#2a9d4f','#1d6fd8','#9b59b6'];for(let i=0;i<60;i++){const d=document.createElement('div');d.className='cf';d.style.cssText=`left:${Math.random()*100}vw;background:${c[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s`;document.body.appendChild(d);setTimeout(()=>d.remove(),5500)}}
-function winCheck(s){if(s.w!=null){if(!WON){WON=true;confetti();setTimeout(()=>sfx('win'),400)}}else WON=false}
-function calcFx(s){
- if(!s||!s.st){PP=null;PS=null;FX={};SIG='';DP=[];MOVING=false;VIEW=null;clearTimeout(AT);return}
- const sig=[s.rc,s.t,s.ph,s.w,JSON.stringify(s.P.map(p=>[p.pos,p.m,p.jail])),Object.keys(s.O).length].join('|');
- if(sig===SIG)return;SIG=sig;
- const t=s.log[0]||'',tn=t&&t!==PL;
- if(PP===null||!PS){DP=s.P.map(p=>p.pos);CARD=s.P[s.t]?s.P[s.t].pos:0}
- else{
-  clearTimeout(AT);MOVING=false;VIEW=null;
-  const F={pop:new Set(),nw:new Set(),dm:{},roll:PR!==(s.rc||0),rs:Date.now()},rk=PS.t,sum=s.d[0]+s.d[1];let m=null;
-  s.P.forEach((p,k)=>{
-   const from=DP[k]!==undefined?DP[k]:PP[k];
-   if(F.roll&&k===rk&&from!==undefined&&p.pos!==from){F.pop.add(p.pos);m={k,from,n:sum,end:p.pos};DP[k]=from}
-   else DP[k]=p.pos;
-   if(PM[k]!==undefined&&PM[k]!==p.m)F.dm[k]=p.m-PM[k];
-   if(p.jail>0&&!(PJ[k]>0))F.shake=1});
-  for(const k in s.O)if(PO[k]===undefined)F.nw.add(+k);
-  if(m){
-   // the roller walks square by square; the screen keeps showing the OLD state (money, log, owners, turn) until arrival
-   MOVING=true;FX={roll:F.roll,rs:F.rs};
-   VIEW=Object.assign(JSON.parse(JSON.stringify(PS)),{d:s.d});
-   if(F.roll)sfx('dice');
-   let i=0;
-   const fin=()=>{MOVING=false;VIEW=null;s.P.forEach((p,k)=>{DP[k]=p.pos});CARD=m.end;FX={...F,ls:Date.now()};if(tn)toast(t);playFx(s,false,0);winCheck(s);render()};
-   const tick=()=>{i++;DP[m.k]=(m.from+i)%40;sfx('step');render();
-    if(i<m.n)AT=setTimeout(tick,STEP);
-    else if(m.end!==(m.from+m.n)%40)AT=setTimeout(fin,450);
-    else fin()};
-   AT=setTimeout(tick,700)}
-  else{FX={...F,ls:F.rs+(F.roll?750:0)};if(F.roll&&s.P[rk])CARD=s.P[rk].pos;if(tn)toast(t);playFx(s,true,F.roll?750:0)}
- }
- PP=s.P.map(p=>p.pos);PO={...s.O};PM=s.P.map(p=>p.m);PJ=s.P.map(p=>p.jail);PR=s.rc||0;PL=t;PS=JSON.parse(JSON.stringify(s));
- if(!MOVING)winCheck(s)}
-let AC=null,MUTE=false;
-function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
-document.addEventListener('pointerdown',ac);
-function mute(){MUTE=!MUTE;document.getElementById('mu').textContent=MUTE?'🔇':'🔊';musicSync()}
-function tone(f,t0,d,type,v,f2){const c=AC;if(!c)return;const o=c.createOscillator(),g=c.createGain(),T=c.currentTime+t0;o.type=type||'sine';o.frequency.setValueAtTime(f,T);if(f2)o.frequency.exponentialRampToValueAtTime(f2,T+d);g.gain.setValueAtTime(v||.15,T);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(g);g.connect(c.destination);o.start(T);o.stop(T+d+.02)}
-function noise(t0,d,v){const c=AC;if(!c)return;const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0),T=c.currentTime+t0;for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;s.buffer=b;g.gain.setValueAtTime(v||.2,T);g.gain.exponentialRampToValueAtTime(.001,T+d);s.connect(f);f.connect(g);g.connect(c.destination);s.start(T)}
-function sfx(k){if(MUTE||!ac())return;
- if(k==='dice'){for(let i=0;i<7;i++)noise(i*.09,.06,.25)}
- else if(k==='step')tone(520,0,.08,'square',.06);
- else if(k==='buy'){tone(988,0,.1,'square',.1);tone(1319,.1,.35,'square',.1)}
- else if(k==='gain'){tone(880,0,.1,'triangle',.15);tone(1175,.1,.2,'triangle',.15)}
- else if(k==='pay'){tone(330,0,.15,'sawtooth',.1);tone(220,.15,.25,'sawtooth',.1)}
- else if(k==='jail'){for(let i=0;i<4;i++)tone(i%2?600:800,i*.18,.18,'square',.1)}
- else if(k==='card'){[660,880,1100,1320].forEach((f,i)=>tone(f,i*.07,.2,'sine',.12))}
- else if(k==='win'){[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,i*.14,.3,'triangle',.18))}}
-function playFx(s,dice,d){
- const t=s.log[0]||'';
- if(dice&&FX.roll)sfx('dice');
- if(FX.shake)setTimeout(()=>sfx('jail'),d);
- else if(t.startsWith('❓'))setTimeout(()=>sfx('card'),d);
- else if(FX.nw&&FX.nw.size)setTimeout(()=>sfx('buy'),d);
- else{const v=Object.values(FX.dm||{});if(v.some(x=>x<0))setTimeout(()=>sfx('pay'),d);else if(v.some(x=>x>0))setTimeout(()=>sfx('gain'),d)}}
-const IMG={},WP={};let IT=null;
-const WT={0:'Egyptian_pound',1:'Luxor',3:'Aswan',4:'Income_tax',5:'Cairo_International_Airport',6:'Alexandria',8:'Port_Said',9:'Sharm_El_Sheikh',10:'Prison',11:'Sanaa',12:'Power_station',13:'Khartoum',14:'Muscat,_Oman',15:'Suez',16:'Kuwait_City',18:'Doha',19:'Manama',20:'Parking_lot',21:'Beirut',23:'Amman',24:'Damascus',25:'Damietta',26:'Tunis',27:'Algiers',28:'Water_supply',29:'Rabat',30:'Handcuffs',31:'Abu_Dhabi',32:'Dubai',34:'Riyadh',35:'Ramses railway station Cairo',37:'Jeddah',38:'Luxury_tax',39:'Cairo',2:'Dice',7:'Dice',17:'Dice',22:'Dice',33:'Dice',36:'Dice'};
-// Wikipedia lead image of an article (CORS-enabled API), cached in localStorage
-const wimg=t=>WP[t]||(WP[t]=(async()=>{
- try{const c=localStorage.getItem('wi2:'+t);if(c)return c}catch(e){}
- let u=null;
- try{const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t));if(r.ok){const j=await r.json();u=j.thumbnail&&j.thumbnail.source||null}}catch(e){}
- if(!u){try{const r=await fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&gsrsearch='+encodeURIComponent(t.replace(/_/g,' '))+'&prop=pageimages&piprop=thumbnail&pithumbsize=400');const j=await r.json(),pg=j.query&&Object.values(j.query.pages)[0];u=pg&&pg.thumbnail&&pg.thumbnail.source||null}catch(e){}}
- if(u)try{localStorage.setItem('wi2:'+t,u)}catch(e){}
- return u})());
-function loadImgs(){for(const k in WT)wimg(WT[k]).then(u=>{if(u){IMG[k]=u;clearTimeout(IT);IT=setTimeout(render,400)}})}
-const pcard=()=>{const q=S[CARD];return `<div class="pcard">${IMG[CARD]?`<img src="${esc(IMG[CARD])}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span>${FL[CARD]||IC[q[1]]||''} ${esc(q[0])}</span></div>`};
 const poster=()=>`<svg class="hero" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="بنك الحظ">
 <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe45c"/><stop offset="1" stop-color="#ff9f1c"/></linearGradient>
 <pattern id="pp" width="40" height="40" patternUnits="userSpaceOnUse"><g fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.2"><rect x="8" y="8" width="24" height="24"/><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)"/></g></pattern></defs>
@@ -282,51 +439,169 @@ ${GC.map((c,i)=>`<rect x="${i*50}" y="206" width="50" height="34" fill="${c}" st
 <g transform="translate(330 30) rotate(12 23 23)"><rect width="46" height="46" rx="8" fill="#fff" stroke="#2b2200" stroke-width="3"/><g fill="#c8102e"><circle cx="12" cy="12" r="4"/><circle cx="23" cy="23" r="4"/><circle cx="34" cy="34" r="4"/></g></g>
 <g font-family="Tahoma,Arial,sans-serif" font-weight="900" font-size="15" text-anchor="middle" fill="#7a4b00"><circle cx="100" cy="32" r="13" fill="#ffd23f" stroke="#b8860b" stroke-width="2.5"/><text x="100" y="38">ج</text><circle cx="300" cy="28" r="10" fill="#ffd23f" stroke="#b8860b" stroke-width="2.5"/><text x="300" y="33" font-size="12">ج</text></g>
 </svg>`;
-// lobby music: لو عندك ملف mp3 حطه جنب index.html واكتب اسمه هنا (مثلا 'music.mp3'). لو سبته فاضي هيشغل لحن فانك بسلم عربي صغير (5 نغمات) متولد في المتصفح
+// ===== animation / feedback (nothing is revealed until the walk has finished) =====
+let PP=null,PS=null,VIEW=null,CARD=0,PO={},PM=[],PJ=[],PR,PL='',WON=false,FX={},SIG='',DP=[],MOVING=false,AT=null,bt=null,RC=0;
+const STEP=180;
+const fx=k=>FX.ls&&Date.now()<FX.ls+1700&&FX[k];
+const fxr=()=>FX.roll&&FX.rs&&Date.now()<FX.rs+900;
+const ad=t=>`animation-delay:${(-(Date.now()-t)/1000).toFixed(2)}s`;
+function toast(t){const e=document.getElementById('toast');if(!e)return;e.textContent=t;e.classList.remove('on');void e.offsetWidth;e.classList.add('on')}
+function confetti(){const c=['#e63946','#f4a300','#2a9d4f','#1d6fd8','#9b59b6'];for(let i=0;i<60;i++){const d=document.createElement('div');d.className='cf';d.style.cssText=`left:${Math.random()*100}vw;background:${c[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s`;document.body.appendChild(d);setTimeout(()=>d.remove(),5500)}}
+function winCheck(s){if(s.w!=null){if(!WON){WON=true;confetti();later(()=>sfx('win'),400)}}else WON=false}
+const hsum=x=>Object.values(x.H||{}).reduce((a,b)=>a+b,0);
+function calcFx(s){
+ if(!s||!s.st){PP=null;PS=null;FX={};SIG='';DP=[];MOVING=false;VIEW=null;unlater(AT);return}
+ const sig=[s.rc,s.t,s.ph,s.w,JSON.stringify(s.P.map(p=>[p.pos,p.m,p.jail])),Object.keys(s.O).length,s.log[0]||'',JSON.stringify(s.H||{}),JSON.stringify(s.M||{})].join('|');
+ if(sig===SIG)return;SIG=sig;
+ const t=s.log[0]||'',tn=t&&t!==PL;
+ if(PP===null||!PS){DP=s.P.map(p=>p.pos);CARD=s.P[s.t]?s.P[s.t].pos:0}
+ else{
+  unlater(AT);MOVING=false;VIEW=null;
+  const F={pop:new Set(),nw:new Set(),dm:{},roll:PR!==(s.rc||0),rs:Date.now()},rk=PS.t,sum=s.d[0]+s.d[1];let m=null;
+  s.P.forEach((p,k)=>{
+   const from=DP[k]!==undefined?DP[k]:PP[k];
+   if(F.roll&&k===rk&&from!==undefined&&p.pos!==from){F.pop.add(p.pos);m={k,from,n:sum,end:p.pos};DP[k]=from}
+   else DP[k]=p.pos;
+   if(PM[k]!==undefined&&PM[k]!==p.m)F.dm[k]=p.m-PM[k];
+   if(p.jail>0&&!(PJ[k]>0))F.shake=1});
+  for(const k in s.O)if(PO[k]===undefined)F.nw.add(+k);
+  if(hsum(s)>hsum(PS))F.snd='build';else if(s.au&&!PS.au)F.snd='gavel';else if(PS.tr&&!s.tr&&t.includes('🤝'))F.snd='deal';
+  if(m){
+   MOVING=true;FX={roll:F.roll,rs:F.rs};
+   VIEW=Object.assign(JSON.parse(JSON.stringify(PS)),{d:s.d});
+   if(F.roll)sfx('dice');
+   let i=0;
+   const fin=()=>{MOVING=false;VIEW=null;s.P.forEach((p,k)=>{DP[k]=p.pos});CARD=m.end;FX={...F,ls:Date.now()};if(tn)toast(t);playFx(s,false,0);winCheck(s);render()};
+   const tick=()=>{i++;DP[m.k]=(m.from+i)%N;sfx('step');render();
+    if(i<m.n)AT=later(tick,STEP);
+    else if(m.end!==(m.from+m.n)%N)AT=later(fin,450);
+    else fin()};
+   AT=later(tick,700)}
+  else{FX={...F,ls:F.rs+(F.roll?750:0)};if(F.roll&&s.P[rk])CARD=s.P[rk].pos;if(tn)toast(t);playFx(s,true,F.roll?750:0)}
+ }
+ PP=s.P.map(p=>p.pos);PO={...s.O};PM=s.P.map(p=>p.m);PJ=s.P.map(p=>p.jail);PR=s.rc||0;PL=t;PS=JSON.parse(JSON.stringify(s));
+ if(!MOVING)winCheck(s)}
+function playFx(s,dice,d){
+ const t=s.log[0]||'';
+ if(dice&&FX.roll)sfx('dice');
+ if(FX.shake)later(()=>sfx('jail'),d);
+ else if(t.startsWith('❓'))later(()=>sfx('card'),d);
+ else if(FX.nw&&FX.nw.size)later(()=>sfx('buy'),d);
+ else{const v=Object.values(FX.dm||{});if(v.some(x=>x<0))later(()=>sfx('pay'),d);else if(v.some(x=>x>0))later(()=>sfx('gain'),d)}
+ if(FX.snd)later(()=>sfx(FX.snd),d+150)}
+// ===== timers that keep running when the tab is in the background =====
+const LQ=[];let LID=0;
+const later=(f,ms)=>{const id=++LID;LQ.push({id,t:performance.now()+ms,f});return id};
+const unlater=id=>{const i=LQ.findIndex(x=>x.id===id);if(i>=0)LQ.splice(i,1)};
+function pump(){const n=performance.now();for(let i=0;i<LQ.length;){if(LQ[i].t<=n){const x=LQ.splice(i,1)[0];try{x.f()}catch(e){console.error(e)}}else i++}}
+(function(){const f=()=>{pump();musTick()};try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),40)'],{type:'text/javascript'})));w.onmessage=f}catch(e){setInterval(f,50)}})();
+// ===== sound effects =====
+let AC=null,MUTE=false;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+document.addEventListener('pointerdown',ac);
+document.addEventListener('visibilitychange',()=>{if(AC&&AC.state==='suspended')AC.resume()});
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button');if(b&&b.id!=='mu'&&!b.disabled)sfx('click')},true);
+document.addEventListener('input',()=>sfx('key'));
+function mute(){MUTE=!MUTE;document.getElementById('mu').textContent=MUTE?'🔇':'🔊';musicSync()}
+function tone(f,t0,d,type,v,f2){const c=AC;if(!c)return;const o=c.createOscillator(),g=c.createGain(),T=c.currentTime+t0;o.type=type||'sine';o.frequency.setValueAtTime(f,T);if(f2)o.frequency.exponentialRampToValueAtTime(f2,T+d);g.gain.setValueAtTime(v||.15,T);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(g);g.connect(c.destination);o.start(T);o.stop(T+d+.02)}
+function noise(t0,d,v){const c=AC;if(!c)return;const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0),T=c.currentTime+t0;for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;s.buffer=b;g.gain.setValueAtTime(v||.2,T);g.gain.exponentialRampToValueAtTime(.001,T+d);s.connect(f);f.connect(g);g.connect(c.destination);s.start(T)}
+function sfx(k){if(MUTE||!ac())return;
+ if(k==='dice'){for(let i=0;i<7;i++)noise(i*.09,.06,.25)}
+ else if(k==='step')tone(520,0,.08,'square',.06);
+ else if(k==='buy'){tone(988,0,.1,'square',.1);tone(1319,.1,.35,'square',.1)}
+ else if(k==='gain'){tone(880,0,.1,'triangle',.15);tone(1175,.1,.2,'triangle',.15)}
+ else if(k==='pay'){tone(330,0,.15,'sawtooth',.1);tone(220,.15,.25,'sawtooth',.1)}
+ else if(k==='jail'){for(let i=0;i<4;i++)tone(i%2?600:800,i*.18,.18,'square',.1)}
+ else if(k==='card'){[660,880,1100,1320].forEach((f,i)=>tone(f,i*.07,.2,'sine',.12))}
+ else if(k==='click'){tone(760,0,.04,'square',.07);tone(520,.03,.05,'square',.05)}
+ else if(k==='tap')tone(440,0,.07,'sine',.1);
+ else if(k==='key')tone(1000,0,.02,'square',.025);
+ else if(k==='join'){tone(523,0,.1,'triangle',.15);tone(784,.09,.2,'triangle',.15)}
+ else if(k==='start'){[392,523,659,784,1047].forEach((f,i)=>tone(f,i*.09,.25,'triangle',.16))}
+ else if(k==='build'){tone(180,0,.08,'square',.14);noise(0,.05,.25);tone(260,.12,.08,'square',.14);noise(.12,.05,.25)}
+ else if(k==='gavel'){tone(140,0,.15,'sine',.3);noise(0,.06,.3);tone(140,.22,.15,'sine',.3);noise(.22,.06,.3)}
+ else if(k==='deal'){[523,659,784].forEach((f,i)=>tone(f,i*.08,.18,'triangle',.15));tone(1047,.26,.3,'triangle',.15)}
+ else if(k==='win'){[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,i*.14,.3,'triangle',.18))}}
+// ===== images from Wikipedia =====
+const IMG={},WP={};let IT=null;
+const WT={0:'Egyptian_pound',1:'Luxor',3:'Aswan',4:'Income_tax',5:'Cairo_International_Airport',6:'Marsa_Matruh',8:'Siwa_Oasis',9:'Dahab',10:'Power_station',11:'Hurghada',12:'Prison',13:'Sharm_El_Sheikh',14:'Ismailia',15:'Suez',17:'Sanaa',18:'Khartoum',19:'Muscat,_Oman',21:'Kuwait_City',22:'Doha',23:'Manama',24:'Parking_lot',25:'Beirut',26:'Amman',27:'Damascus',28:'Damietta',30:'Water_supply',31:'Tunis',32:'Algiers',33:'Rabat',35:'Tripoli,_Libya',36:'Handcuffs',37:'Abu_Dhabi',38:'Dubai',40:'Riyadh',41:'Ramses railway station Cairo',42:'Jeddah',43:'Dammam',44:'Alexandria',45:'Giza',46:'Cairo',47:'Luxury_tax',2:'Dice',7:'Dice',16:'Dice',20:'Dice',29:'Dice',34:'Dice',39:'Dice'};
+const wimg=t=>WP[t]||(WP[t]=(async()=>{
+ try{const c=localStorage.getItem('wi2:'+t);if(c)return c}catch(e){}
+ let u=null;
+ try{const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t));if(r.ok){const j=await r.json();u=j.thumbnail&&j.thumbnail.source||null}}catch(e){}
+ if(!u){try{const r=await fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&gsrsearch='+encodeURIComponent(t.replace(/_/g,' '))+'&prop=pageimages&piprop=thumbnail&pithumbsize=400');const j=await r.json(),pg=j.query&&Object.values(j.query.pages)[0];u=pg&&pg.thumbnail&&pg.thumbnail.source||null}catch(e){}}
+ if(u)try{localStorage.setItem('wi2:'+t,u)}catch(e){}
+ return u})());
+function loadImgs(){for(const k in WT)wimg(WT[k]).then(u=>{if(u){IMG[k]=u;clearTimeout(IT);IT=setTimeout(render,400)}})}
+// ===== music: lobby groove + 10 different gameplay tracks played in random order =====
 const LOBBY_MUSIC_URL='';
-let MG=null,MT=null,MA=null,INLOBBY=false;
-function musicSync(){if(INLOBBY&&!MUTE)musicStart();else musicStop()}
-function musicStop(){if(MT){clearInterval(MT);MT=null}if(MA){MA.pause();MA=null}if(MG&&AC){const g=MG;MG=null;g.gain.setTargetAtTime(0,AC.currentTime,.15);setTimeout(()=>g.disconnect(),1200)}}
-function musicStart(){
- if(MT||MA)return;
- if(LOBBY_MUSIC_URL){MA=new Audio(LOBBY_MUSIC_URL);MA.loop=true;MA.volume=.4;MA.play().catch(()=>{});return}
+let MG=null,MS=null,MA=null,INLOBBY=false,MODE='',TQ=[],LST=-1;
+const rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const DR={
+ funk:{k0:[0,7,10],k1:[0,7,10,13],s:[4,12],h:[0,2,4,6,8,10,12],oh:[14]},
+ house:{k0:[0,4,8,12],k1:[0,4,8,12],s:[4,12],h:[],oh:[2,6,10,14]},
+ disco:{k0:[0,4,8,12],k1:[0,4,8,12],s:[4,12],h:[0,4,8,12],oh:[2,6,10,14]},
+ trap:{k0:[0,6,10],k1:[0,3,10],s:[8],h:[0,2,4,6,7,8,10,12,14,15],oh:[]},
+ lofi:{k0:[0,7,10],k1:[0,5,10],s:[4,12],h:[0,2,4,6,8,10,12,14],oh:[],v:.55},
+ reggae:{k0:[8],k1:[8],s:[8],h:[0,2,4,6,8,10,12,14],oh:[]},
+ rock:{k0:[0,8,10],k1:[0,6,8],s:[4,12],h:[0,2,4,6,8,10,12,14],oh:[]},
+ chip:{k0:[0,8],k1:[0,6,8,14],s:[4,12],h:[0,2,4,6,8,10,12,14],oh:[]},
+ swing:{k0:[0,6,10],k1:[0,6,10,14],s:[4,12],h:[0,3,4,7,8,11,12,15],oh:[]}};
+const LOBBYT={n:'فانك',bpm:104,root:82.41,sc:[0,1,4,5,7],dr:'funk',bw:'sawtooth',lw:'square',sw:.18,stab:[6,14],ch:[24,28,31],
+ P:{bass:[[[0,0,1.5],[2,0,1],[5,4,1],[6,5,1],[8,0,1.5],[10,1,1],[11,0,1],[13,7,1],[14,5,1]],[[0,0,1.5],[3,0,1],[4,1,1],[6,0,1],[8,4,1.5],[9,5,1],[11,7,1],[12,5,1],[14,4,1],[15,1,.8]]],
+ lead:[[[2,24,1],[3,25,1],[5,28,2],[8,29,1],[10,28,1],[11,25,1],[12,24,3]],[[0,19,1],[2,24,1],[3,25,1],[4,28,2],[7,29,1],[8,31,2],[11,29,1],[12,28,1],[13,25,1],[14,24,2]]]}};
+const TR=[
+ {n:'فانك المدينة',bpm:104,root:82.41,sc:[0,1,4,5,7],dr:'funk',bw:'sawtooth',lw:'square',dens:.55,ld:.4,sw:.18,seed:11,stab:[6,14]},
+ {n:'هاوس الحجاز',bpm:118,root:73.42,sc:[0,1,4,5,7,8,10],dr:'house',bw:'sawtooth',lw:'sawtooth',dens:.5,ld:.45,seed:23,stab:[2,6,10,14]},
+ {n:'شيب السوق',bpm:132,root:110,sc:[0,2,3,5,7,8,11],dr:'chip',bw:'square',lw:'square',dens:.6,ld:.55,seed:37,stab:[]},
+ {n:'لو-فاي ليلي',bpm:78,root:65.41,sc:[0,2,3,5,7,8,10],dr:'lofi',bw:'triangle',lw:'triangle',dens:.4,ld:.3,sw:.25,seed:41,stab:[0,8],bl:700},
+ {n:'ديسكو كرد',bpm:112,root:98,sc:[0,1,3,5,7,8,10],dr:'disco',bw:'sawtooth',lw:'square',dens:.6,ld:.45,seed:53,stab:[2,6,10,14]},
+ {n:'تراب بياتي',bpm:140,root:61.74,sc:[0,1,3,5,7,8,10],dr:'trap',bw:'sine',lw:'triangle',dens:.35,ld:.35,seed:67,stab:[],bl:500},
+ {n:'ريجيه بنتاتونك',bpm:84,root:110,sc:[0,3,5,7,10],dr:'reggae',bw:'triangle',lw:'square',dens:.4,ld:.35,seed:71,stab:[4,12]},
+ {n:'روك ماينور',bpm:124,root:82.41,sc:[0,3,5,7,10],dr:'rock',bw:'sawtooth',lw:'sawtooth',dens:.55,ld:.4,seed:83,stab:[0,8]},
+ {n:'سوينج الخمسينات',bpm:96,root:73.42,sc:[0,2,4,7,9],dr:'swing',bw:'triangle',lw:'triangle',dens:.5,ld:.5,sw:.33,seed:97,stab:[2,10]},
+ {n:'تكنو فريجيان',bpm:128,root:65.41,sc:[0,1,3,5,7,8,10],dr:'house',bw:'sawtooth',lw:'square',dens:.6,ld:.3,seed:101,stab:[3,7,11,15]}];
+function genPat(sp){
+ const r=rng(sp.seed),sc=sp.sc,pick=a=>a[Math.floor(r()*a.length)];
+ const A=[];for(let i=0;i<16;i++)if(i===0||r()<sp.dens)A.push([i,i%8===0?0:pick(sc.slice(0,Math.min(4,sc.length))),r()<.6?1:2]);
+ const B=A.map(([i,n,l])=>[i,r()<.25?pick(sc):n,l]);
+ const Ld=[];let last=0;for(let i=0;i<16;i++)if(r()<sp.ld){last=Math.max(0,Math.min(sc.length-1,last+Math.floor(r()*3)-1));Ld.push([i,sc[last]+24,r()<.6?1:2])}
+ const L2=Ld.map(([i,n,l])=>[i,r()<.3?pick(sc)+24:n,l]);
+ return{bass:[A,B],lead:[Ld,L2]}}
+function ready(sp){if(!sp.P)sp.P=genPat(sp);if(!sp.ch)sp.ch=[24,24+sp.sc[2],24+sp.sc[Math.min(4,sp.sc.length-1)]];return sp}
+function mO(f,T,d,ty,v,lp){const c=AC,o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f,T);fl.type='lowpass';fl.frequency.setValueAtTime(lp,T);fl.frequency.exponentialRampToValueAtTime(300,T+d);g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(v,T+.008);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(fl);fl.connect(g);g.connect(MG);o.start(T);o.stop(T+d+.03)}
+function mN(T,d,v,ty,f){const c=AC,n=Math.floor(c.sampleRate*d),bf=c.createBuffer(1,n,c.sampleRate),a=bf.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),g=c.createGain(),fl=c.createBiquadFilter();fl.type=ty;fl.frequency.value=f;g.gain.value=v;s.buffer=bf;s.connect(fl);fl.connect(g);g.connect(MG);s.start(T)}
+function mK(T,v){const c=AC,o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(140,T);o.frequency.exponentialRampToValueAtTime(45,T+.12);g.gain.setValueAtTime(.7*v,T);g.gain.exponentialRampToValueAtTime(.001,T+.25);o.connect(g);g.connect(MG);o.start(T);o.stop(T+.3)}
+function sched(sp,T,bar,q){
+ const sw=i=>T+i*q+(i%2?q*(sp.sw||0):0),Dr=DR[sp.dr],v=Dr.v||1,P=sp.P;
+ P.bass[bar].forEach(([i,n,l])=>mO(sp.root*2**(n/12),sw(i),l*q*.9,sp.bw,.26,sp.bl||900));
+ P.lead[bar].forEach(([i,n,l])=>mO(sp.root*2**(n/12),sw(i),l*q*.95,sp.lw,.08,2400));
+ (sp.stab||[]).forEach(i=>sp.ch.forEach(n=>mO(sp.root*2**(n/12),sw(i),q*.8,'sawtooth',.035,2000)));
+ (bar?Dr.k1:Dr.k0).forEach(i=>mK(sw(i),v));
+ Dr.s.forEach(i=>{mN(sw(i),.13,.3*v,'bandpass',1800);mO(190,sw(i),.08,'triangle',.2*v,3000)});
+ Dr.h.forEach(i=>mN(sw(i),.03,.07*v,'highpass',7000));
+ (Dr.oh||[]).forEach(i=>mN(sw(i),.12,.08*v,'highpass',6000))}
+function setNP(n){const e=document.getElementById('np');if(e)e.textContent=n?'🎵 '+n:''}
+function pickTrack(){if(!TQ.length){TQ=TR.map((_,i)=>i).sort(()=>Math.random()-.5);if(TQ[0]===LST&&TQ.length>1)TQ.push(TQ.shift())}LST=TQ.shift();return ready(TR[LST])}
+function musTick(){const c=AC;if(!c||!MS||!MG)return;
+ while(MS.nx<c.currentTime+3){const sp=MS.sp,q=60/sp.bpm/4;sched(sp,MS.nx,MS.bar&1,q);MS.nx+=16*q;MS.bar++;
+  if(MS.mode==='game'&&MS.bar>=16){MS.sp=pickTrack();MS.bar=0;setNP(MS.sp.n)}}}
+function musicSync(){const w=MUTE?'':(INLOBBY?'lobby':'game');if(w===MODE)return;musicStop();MODE=w;if(w)musicStart(w)}
+function musicStop(){MS=null;setNP('');if(MA){MA.pause();MA=null}if(MG&&AC){const g=MG;MG=null;g.gain.setTargetAtTime(0,AC.currentTime,.15);setTimeout(()=>g.disconnect(),1200)}}
+function musicStart(mode){
+ if(mode==='lobby'&&LOBBY_MUSIC_URL){MA=new Audio(LOBBY_MUSIC_URL);MA.loop=true;MA.volume=.4;MA.play().catch(()=>{});return}
  const c=ac();if(!c)return;
- MG=c.createGain();MG.gain.value=.55;MG.connect(c.destination);
- const q=60/104/4;
- const FQ={E2:82.41,F2:87.31,G2:103.83,A2:110,B2:123.47,B3:246.94,E4:329.63,F4:349.23,G4:415.3,A4:440,B4:493.88};
- const O=(f,T,d,ty,v,lp)=>{const o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f,T);fl.type='lowpass';fl.frequency.setValueAtTime(lp,T);fl.frequency.exponentialRampToValueAtTime(300,T+d);g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(v,T+.008);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(fl);fl.connect(g);g.connect(MG);o.start(T);o.stop(T+d+.03)};
- const nz=(T,d,v,ty,f)=>{const n=Math.floor(c.sampleRate*d),bf=c.createBuffer(1,n,c.sampleRate),a=bf.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),g=c.createGain(),fl=c.createBiquadFilter();fl.type=ty;fl.frequency.value=f;g.gain.value=v;s.buffer=bf;s.connect(fl);fl.connect(g);g.connect(MG);s.start(T)};
- const kick=T=>{const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(140,T);o.frequency.exponentialRampToValueAtTime(45,T+.12);g.gain.setValueAtTime(.7,T);g.gain.exponentialRampToValueAtTime(.001,T+.25);o.connect(g);g.connect(MG);o.start(T);o.stop(T+.3)};
- const BASS=[[[0,'E2',1.5],[2,'E2',1],[5,'G2',1],[6,'A2',1],[8,'E2',1.5],[10,'F2',1],[11,'E2',1],[13,'B2',1],[14,'A2',1]],
-  [[0,'E2',1.5],[3,'E2',1],[4,'F2',1],[6,'E2',1],[8,'G2',1.5],[9,'A2',1],[11,'B2',1],[12,'A2',1],[14,'G2',1],[15,'F2',.8]]];
- const LEAD=[[[2,'E4',1],[3,'F4',1],[5,'G4',2],[8,'A4',1],[10,'G4',1],[11,'F4',1],[12,'E4',3]],
-  [[0,'B3',1],[2,'E4',1],[3,'F4',1],[4,'G4',2],[7,'A4',1],[8,'B4',2],[11,'A4',1],[12,'G4',1],[13,'F4',1],[14,'E4',2]]];
- const sched=(T,bar)=>{
-  const sw=i=>T+i*q+(i%2?q*.18:0);
-  BASS[bar].forEach(([i,n,l])=>O(FQ[n],sw(i),l*q*.9,'sawtooth',.28,900));
-  LEAD[bar].forEach(([i,n,l])=>O(FQ[n],sw(i),l*q*.95,'square',.09,2400));
-  [6,14].forEach(i=>['E4','G4','B4'].forEach(n=>O(FQ[n],sw(i),q*.8,'sawtooth',.04,2000)));
-  (bar?[0,7,10,13]:[0,7,10]).forEach(i=>kick(sw(i)));
-  [4,12].forEach(i=>{nz(sw(i),.13,.3,'bandpass',1800);O(190,sw(i),.08,'triangle',.2,3000)});
-  for(let i=0;i<16;i+=2)nz(sw(i),.03,.07,'highpass',7000);
-  nz(sw(14),.12,.08,'highpass',6000)};
- let nx=c.currentTime+.15,bar=0;
- MT=setInterval(()=>{while(nx<c.currentTime+.4){sched(nx,bar);nx+=16*q;bar^=1}},120)}
-let RC=0;
-let bt=null;
-function botTick(){
- const s=G;if(bt||busy||MOVING||!s||!s.st||s.w!=null)return;
- const p=cur(s);if(!p||!p.bot)return;
- const h=s.P.find(x=>!x.bot);if(!local&&(!h||h.id!==me))return;
- bt=setTimeout(()=>{bt=null;const s=G;if(!s||s.w!=null||busy)return;const p=cur(s);if(!p||!p.bot)return;
-  if(s.ph==='roll')act(p.jail>0&&p.m>300?'payj':'roll');
-  else if(s.ph==='buy')act(p.m-S[p.pos][2]>=150?'buy':'skip');
-  else act('end')},1000)}
+ MG=c.createGain();MG.gain.value=mode==='lobby'?.55:.4;MG.connect(c.destination);
+ const sp=mode==='lobby'?ready(LOBBYT):pickTrack();
+ MS={sp,nx:c.currentTime+.15,bar:0,mode};setNP(sp.n);musTick()}
+// ===== start =====
 (async()=>{
- loadImgs();const f=await Promise.race([window.fbReady,new Promise(r=>setTimeout(()=>r(null),8000))]);
+ loadImgs();
+ const f=await Promise.race([window.fbReady,new Promise(r=>setTimeout(()=>r(null),8000))]);
  if(f){me=f.uid;ref=f.ref;ref.onSnapshot(sn=>{if(!busy){G=sn.exists?sn.data():null;render()}},e=>{err='مشكلة في الاتصال';render()})}
  if(!ref)local=true;render()})();
-</script><script type="module">
+</script>
+<script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getDatabase,ref,set,onValue} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -339,8 +614,12 @@ const firebaseConfig={
  appId:"1:432492747526:web:376c35d31ff38134fd9c87"
 };
 // Realtime Database drops empty arrays/objects and turns number-keyed objects into arrays; restore the shape the game expects
-const norm=v=>{if(!v)return null;const O={};for(const k in(v.O||{}))if(v.O[k]!=null)O[k]=v.O[k];
- return {...v,P:(Array.isArray(v.P)?v.P:Object.values(v.P||{})).filter(Boolean),O,log:Array.isArray(v.log)?v.log:Object.values(v.log||{}),d:v.d||[1,1]}};
+const arr=x=>Array.isArray(x)?x.filter(y=>y!=null):Object.values(x||{});
+const mp=m=>{const o={};for(const k in(m||{}))if(m[k]!=null)o[k]=m[k];return o};
+// Realtime Database drops empty arrays/objects and turns number-keyed objects into arrays; restore the shape the game expects
+const norm=v=>{if(!v)return null;
+ return {...v,P:arr(v.P),O:mp(v.O),V:mp(v.V),H:mp(v.H),M:mp(v.M),log:arr(v.log),d:v.d||[1,1],
+  au:v.au?{...v.au,pass:arr(v.au.pass)}:null,tr:v.tr?{...v.tr,gp:arr(v.tr.gp),wp:arr(v.tr.wp)}:null}};
 (async()=>{try{
  if(firebaseConfig.apiKey.startsWith("PASTE"))throw new Error("Firebase config not filled: running in local mode");
  const app=initializeApp(firebaseConfig),cred=await signInAnonymously(getAuth(app)),r=ref(getDatabase(app),"rooms/"+window.ROOM);
